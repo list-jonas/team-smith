@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.ChatColor;
 
 public class PlayerChatListener implements Listener {
 
@@ -19,9 +20,11 @@ public class PlayerChatListener implements Listener {
         Team team = teamManager.getPlayerTeam(player);
 
         if (team != null) {
-            String prefix = team.getPrefix();
-            if (prefix != null && !prefix.isEmpty()) {
-                event.setFormat(prefix + event.getFormat());
+            String prefixText = team.getPrefix();
+            String prefixColor = team.getPrefixColor();
+            if (prefixText != null && !prefixText.isEmpty()) {
+                String coloredPrefix = ChatColor.translateAlternateColorCodes('&', prefixColor + prefixText);
+                event.setFormat(coloredPrefix + ChatColor.RESET + event.getFormat()); // Added ChatColor.RESET to prevent color bleeding
             }
         }
     }

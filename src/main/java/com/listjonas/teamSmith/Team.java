@@ -10,6 +10,7 @@ public class Team {
     private UUID leader;
     private Set<UUID> members;
     private String prefix;
+    private String prefixColor; // Added for prefix color
 
     // Constructor for creating a new team
     public Team(String name, Player leaderPlayer) {
@@ -18,6 +19,7 @@ public class Team {
         this.members = new HashSet<>();
         this.members.add(leaderPlayer.getUniqueId());
         this.prefix = "[" + name + "] "; // Default prefix
+        this.prefixColor = "&f"; // Default to white color
     }
 
     // Constructor for loading a team from data
@@ -26,6 +28,7 @@ public class Team {
         this.name = name;
         this.leader = UUID.fromString((String) data.get("leader"));
         this.prefix = (String) data.get("prefix");
+        this.prefixColor = (String) data.getOrDefault("prefixColor", "&f"); // Default to white if not found
         List<String> memberUuids = (List<String>) data.get("members");
         this.members = memberUuids.stream().map(UUID::fromString).collect(Collectors.toSet());
     }
@@ -34,6 +37,7 @@ public class Team {
         Map<String, Object> data = new HashMap<>();
         data.put("leader", leader.toString());
         data.put("prefix", prefix);
+        data.put("prefixColor", prefixColor);
         data.put("members", members.stream().map(UUID::toString).collect(Collectors.toList()));
         return data;
     }
@@ -77,6 +81,14 @@ public class Team {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public String getPrefixColor() {
+        return prefixColor;
+    }
+
+    public void setPrefixColor(String prefixColor) {
+        this.prefixColor = prefixColor;
     }
 
     public int getSize() {
