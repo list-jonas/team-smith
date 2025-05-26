@@ -1,0 +1,4 @@
+# This is the default teams.yml file for TeamSmith.
+# It will be populated with team data as teams are created and modified.
+
+teams: {}
