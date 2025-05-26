@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class TransferOwnershipHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
         // Suggest online player names for the first argument
         if (args.length == 1) {
             return Bukkit.getOnlinePlayers().stream()

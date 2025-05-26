@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -56,7 +57,7 @@ public class SetRoleHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) {
             // Suggest roles for the first argument
             return Arrays.asList("manager", "member");

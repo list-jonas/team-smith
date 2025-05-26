@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands.handlers;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import java.util.Collections;
@@ -50,8 +51,18 @@ public class TpWarpHandler implements SubCommandExecutor {
     @Override
     public String getDescription() { return "Teleport to a named team warp (3 min cooldown)."; }
     @Override
-    public List<String> getTabCompletions(String[] args) {
-        if (args.length == 1) return Collections.singletonList("<name>");
-        return Collections.emptyList();
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
+        if (args.length == 1) {
+            // Suggest available warp names for the player's team
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                Team team = TeamManager.getInstance().getPlayerTeam(player);
+                if (team != null) {
+                    return new java.util.ArrayList<>(team.getWarps().keySet());
+                }
+            }
+            return java.util.Collections.emptyList();
+        }
+        return java.util.Collections.emptyList();
     }
 }

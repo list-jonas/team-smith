@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -30,7 +31,7 @@ public class CreateTeamHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
         // Suggest <teamName> as a placeholder for the required argument
         if (args.length == 1) {
             return Collections.singletonList("<teamName>");

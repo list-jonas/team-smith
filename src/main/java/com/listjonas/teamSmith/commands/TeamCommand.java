@@ -66,11 +66,23 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
+            // top-level subcommands
             return handlers.keySet().stream()
-                .filter(k -> k.startsWith(args[0].toLowerCase()))
+                .filter(cmd -> cmd.startsWith(args[0].toLowerCase()))
                 .collect(Collectors.toList());
         }
+
         SubCommandExecutor handler = handlers.get(args[0].toLowerCase());
-        return handler != null ? handler.getTabCompletions(args) : Collections.emptyList();
+        if (handler == null) return Collections.emptyList();
+
+        // Pass only the “real” args to the handler
+        String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
+        List<String> suggestions = handler.getTabCompletions(sender, subArgs);
+
+        // Filter suggestions against the *current* token
+        String current = subArgs[subArgs.length - 1].toLowerCase();
+        return suggestions.stream()
+            .filter(s -> s.toLowerCase().startsWith(current))
+            .collect(Collectors.toList());
     }
 }

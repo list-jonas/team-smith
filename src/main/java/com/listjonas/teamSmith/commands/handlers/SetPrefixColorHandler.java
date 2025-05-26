@@ -39,7 +39,7 @@ public class SetPrefixColorHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(org.bukkit.command.CommandSender sender, String[] args) {
         // Suggest Minecraft color codes for the first argument
         if (args.length == 1) {
             return Arrays.asList(

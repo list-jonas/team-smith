@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands.handlers;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import java.util.Collections;
@@ -30,5 +31,5 @@ public class TpHomeHandler implements SubCommandExecutor {
     @Override
     public String getDescription() { return "Teleport to the team home location."; }
     @Override
-    public List<String> getTabCompletions(String[] args) { return Collections.emptyList(); }
+    public java.util.List<String> getTabCompletions(CommandSender sender, String[] args) { return Collections.emptyList(); }
 }

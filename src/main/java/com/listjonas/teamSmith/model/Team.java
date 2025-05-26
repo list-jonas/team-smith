@@ -66,21 +66,30 @@ public class Team {
                 } catch (IllegalArgumentException e) {
                     // Handle cases where role string is invalid or UUID is malformed
                     System.err.println("Error loading role for team " + name + ": Invalid role or UUID string " + entry.getValue() + " / " + entry.getKey());
-                    // Optionally, assign a default role or skip this member
                 }
             }
         }
 
-        // Backwards compatibility for old data structure (leader and members list)
-        if (this.memberRoles.isEmpty() && data.containsKey("leader") && data.containsKey("members")) {
-            UUID oldLeader = UUID.fromString((String) data.get("leader"));
-            this.memberRoles.put(oldLeader, Role.OWNER);
-            List<String> memberUuids = (List<String>) data.get("members");
-            if (memberUuids != null) {
-                memberUuids.stream()
-                        .map(UUID::fromString)
-                        .filter(uuid -> !uuid.equals(oldLeader)) // Ensure leader isn't added again as member
-                        .forEach(uuid -> this.memberRoles.put(uuid, Role.MEMBER));
+        // === deserialize homeLocation if present ===
+        Object homeObj = data.get("homeLocation");
+        if (homeObj instanceof Map) {
+            // safe cast because we serialized it as Map<String,Object>
+            this.homeLocation = LocationUtil.deserializeLocation(
+                    (Map<String,Object>) homeObj
+            );
+        }
+
+        // === deserialize named warps if present ===
+        Object warpsObj = data.get("warps");
+        if (warpsObj instanceof Map) {
+            // cast down to the same shape you serialized: Map<String,Map<String,Object>>
+            Map<String, Map<String,Object>> warpsData =
+                    (Map<String, Map<String,Object>>) warpsObj;
+            for (Map.Entry<String, Map<String,Object>> e : warpsData.entrySet()) {
+                Location loc = LocationUtil.deserializeLocation(e.getValue());
+                if (loc != null) {
+                    this.warps.put(e.getKey(), loc);
+                }
             }
         }
     }
@@ -96,8 +105,18 @@ public class Team {
             serializedRoles.put(entry.getKey().toString(), entry.getValue().name());
         }
         data.put("memberRoles", serializedRoles);
-        // data.put("leader", getOwner().toString()); // Store owner explicitly if needed, or derive from roles
-        // data.put("members", members.stream().map(UUID::toString).collect(Collectors.toList())); // Old serialization
+        // Serialize homeLocation if present
+        if (homeLocation != null) {
+            data.put("homeLocation", LocationUtil.serializeLocation(homeLocation));
+        }
+        // Serialize warps if present
+        if (warps != null && !warps.isEmpty()) {
+            Map<String, Map<String, Object>> serializedWarps = new HashMap<>();
+            for (Map.Entry<String, org.bukkit.Location> entry : warps.entrySet()) {
+                serializedWarps.put(entry.getKey(), LocationUtil.serializeLocation(entry.getValue()));
+            }
+            data.put("warps", serializedWarps);
+        }
         return data;
     }
 

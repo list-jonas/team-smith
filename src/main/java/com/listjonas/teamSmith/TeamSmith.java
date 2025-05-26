@@ -15,7 +15,7 @@ public class TeamSmith extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        teamManager = new TeamManager(this);
+        teamManager = TeamManager.createInstance(this);
 
         // Register commands programmatically for Paper compatibility
         TeamCommand teamExecutor = new TeamCommand(this, teamManager);

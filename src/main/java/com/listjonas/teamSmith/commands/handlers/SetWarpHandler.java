@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands.handlers;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import java.util.Collections;
@@ -40,12 +41,15 @@ public class SetWarpHandler implements SubCommandExecutor {
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Warp '" + warpName + "' set to your current location.");
         return true;
     }
+    
     @Override
     public String getArgumentUsage() { return "<name>"; }
+    
     @Override
     public String getDescription() { return "Sets a named team warp (OWNER/MANAGER, max 3)."; }
+    
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) return Collections.singletonList("<name>");
         return Collections.emptyList();
     }

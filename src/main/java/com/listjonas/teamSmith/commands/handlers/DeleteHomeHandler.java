@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands.handlers;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
@@ -34,5 +35,5 @@ public class DeleteHomeHandler implements SubCommandExecutor {
     @Override
     public String getDescription() { return "Deletes the team home location (OWNER/MANAGER only)."; }
     @Override
-    public List<String> getTabCompletions(String[] args) { return Collections.emptyList(); }
+    public List<String> getTabCompletions(CommandSender sender, String[] args) { return Collections.emptyList(); }
 }

@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands.handlers;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class SetPrefixHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(String[] args) {
+    public List<String> getTabCompletions(CommandSender sender, String[] args) {
         // Suggest <prefix> as a placeholder for the required argument
         if (args.length == 1) {
             return Collections.singletonList("<prefix>");
