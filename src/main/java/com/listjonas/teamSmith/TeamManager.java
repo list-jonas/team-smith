@@ -228,6 +228,41 @@ public class TeamManager {
         return true;
     }
 
+    public boolean setTeamFriendlyFire(String teamName, boolean enabled, Player requester) {
+        Team team = getTeam(teamName);
+        if (team == null) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
+            return false;
+        }
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        if (requesterRole != Team.Role.OWNER && requesterRole != Team.Role.MANAGER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER or MANAGER can change the friendly fire setting.");
+            return false;
+        }
+        team.setFriendlyFireEnabled(enabled);
+        saveTeams(); // Save after changing setting
+        requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Friendly fire for team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " has been " + (enabled ? "ENABLED" : "DISABLED") + ".");
+        return true;
+    }
+
+    public boolean setTeamMotd(String teamName, String motd, Player requester) {
+        Team team = getTeam(teamName);
+        if (team == null) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
+            return false;
+        }
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        if (requesterRole != Team.Role.OWNER && requesterRole != Team.Role.MANAGER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER or MANAGER can set the MOTD.");
+            return false;
+        }
+        team.setTeamMotd(motd);
+        saveTeams(); // Save after changing setting
+        String displayMotd = ChatColor.translateAlternateColorCodes('&', motd);
+        requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " MOTD set to: " + displayMotd + ChatColor.RESET);
+        return true;
+    }
+
     public boolean promotePlayerRole(String teamName, Player targetPlayer, Team.Role newRole, Player requester) {
         Team team = getTeam(teamName);
         if (team == null) {
@@ -292,6 +327,8 @@ public class TeamManager {
         }
         plugin.getLogger().info("Loaded " + teams.size() + " teams from " + TEAMS_DATA_FILE);
     }
+
+
 
     public void saveTeams() {
         Map<String, Map<String, Object>> teamsToSave = new HashMap<>();

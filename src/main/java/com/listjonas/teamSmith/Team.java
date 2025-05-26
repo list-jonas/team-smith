@@ -10,6 +10,8 @@ public class Team {
     private Map<UUID, Role> memberRoles;
     private String prefix;
     private String prefixColor; // Added for prefix color
+    private boolean friendlyFireEnabled; // Added for friendly fire setting
+    private String teamMotd; // Added for team MOTD
 
     public enum Role {
         OWNER,
@@ -24,6 +26,8 @@ public class Team {
         this.memberRoles.put(leaderPlayer.getUniqueId(), Role.OWNER);
         this.prefix = "[" + name + "] "; // Default prefix
         this.prefixColor = "&f"; // Default to white color
+        this.friendlyFireEnabled = true; // Default to true (friendly fire enabled)
+        this.teamMotd = ""; // Default to empty MOTD
     }
 
     // Constructor for loading a team from data
@@ -32,7 +36,9 @@ public class Team {
         this.name = name;
         this.prefix = (String) data.get("prefix");
         this.prefixColor = (String) data.getOrDefault("prefixColor", "&f"); // Default to white if not found
-        
+        this.friendlyFireEnabled = (boolean) data.getOrDefault("friendlyFireEnabled", true); // Default to true if not found
+        this.teamMotd = (String) data.getOrDefault("teamMotd", ""); // Default to empty if not found
+
         this.memberRoles = new HashMap<>();
         Map<String, String> rolesData = (Map<String, String>) data.get("memberRoles");
         if (rolesData != null) {
@@ -65,6 +71,8 @@ public class Team {
         Map<String, Object> data = new HashMap<>();
         data.put("prefix", prefix);
         data.put("prefixColor", prefixColor);
+        data.put("friendlyFireEnabled", friendlyFireEnabled);
+        data.put("teamMotd", teamMotd);
         Map<String, String> serializedRoles = new HashMap<>();
         for (Map.Entry<UUID, Role> entry : memberRoles.entrySet()) {
             serializedRoles.put(entry.getKey().toString(), entry.getValue().name());
@@ -161,5 +169,21 @@ public class Team {
 
     public int getSize() {
         return memberRoles.size();
+    }
+
+    public boolean isFriendlyFireEnabled() {
+        return friendlyFireEnabled;
+    }
+
+    public void setFriendlyFireEnabled(boolean friendlyFireEnabled) {
+        this.friendlyFireEnabled = friendlyFireEnabled;
+    }
+
+    public String getTeamMotd() {
+        return teamMotd;
+    }
+
+    public void setTeamMotd(String teamMotd) {
+        this.teamMotd = teamMotd;
     }
 }

@@ -45,6 +45,8 @@ public class TeamSmith extends JavaPlugin {
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerChatListener(teamManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(teamManager), this);
+        getServer().getPluginManager().registerEvents(new EntityDamageListener(teamManager), this);
 
         getLogger().info("TeamSmith plugin has been enabled!");
     }

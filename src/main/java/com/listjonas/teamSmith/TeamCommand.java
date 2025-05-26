@@ -186,6 +186,19 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
                 }
                 teamManager.promotePlayerRole(teamForSetRole.getName(), targetPlayerSetRole, newRole, player);
                 break;
+            case "motd":
+                if (args.length < 2) {
+                    player.sendMessage(MSG_PREFIX + INFO_COLOR + "Usage: /team motd <message>");
+                    return true;
+                }
+                Team teamForMotd = teamManager.getPlayerTeam(player);
+                if (teamForMotd == null) {
+                    player.sendMessage(MSG_PREFIX + ERROR_COLOR + "You are not in a team to set an MOTD for.");
+                    return true;
+                }
+                String motd = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                teamManager.setTeamMotd(teamForMotd.getName(), motd, player);
+                break;
             default:
                 sendHelpMessage(player);
                 break;
@@ -204,6 +217,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(INFO_COLOR + "/team setrole <playerName> <role>" + ChatColor.GRAY + " - Sets a player's role (OWNER only). Roles: MANAGER, MEMBER.");
         player.sendMessage(INFO_COLOR + "/team prefix <newPrefix>" + ChatColor.GRAY + " - Sets your team's chat prefix (OWNER/MANAGER only).");
         player.sendMessage(INFO_COLOR + "/team prefixcolor <colorcode>" + ChatColor.GRAY + " - Sets your team's prefix color (OWNER/MANAGER only).");
+        player.sendMessage(INFO_COLOR + "/team friendlyfire <on|off>" + ChatColor.GRAY + " - Toggles friendly fire for your team. (Aliases: /team ff)");
         player.sendMessage(INFO_COLOR + "/team info" + ChatColor.GRAY + " - Shows information about your current team.");
         player.sendMessage(MSG_PREFIX + ACCENT_COLOR + "--------------------");
     }
@@ -263,6 +277,19 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
                         completions.add(color);
                     }
                 }
+            }
+            // Tab completion for friendlyfire on/off
+            if (subCommand.equals("friendlyfire") || subCommand.equals("ff")) {
+                if ("on".startsWith(args[1].toLowerCase())) {
+                    completions.add("on");
+                }
+                if ("off".startsWith(args[1].toLowerCase())) {
+                    completions.add("off");
+                }
+            }
+            // No specific tab completion for motd message, as it's free text
+            if (subCommand.equals("motd")) {
+                // No completions needed for free text
             }
         } else if (args.length == 3 && args[0].equalsIgnoreCase("setrole")) {
             // Role suggestions for setrole command
