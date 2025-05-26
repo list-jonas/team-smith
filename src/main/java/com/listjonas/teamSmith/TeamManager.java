@@ -53,8 +53,8 @@ public class TeamManager {
             requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
             return false;
         }
-        if (!team.isLeader(requester)) {
-            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team leader can delete the team.");
+        if (team.getPlayerRole(requester.getUniqueId()) != Team.Role.OWNER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER can delete the team.");
             return false;
         }
         for (UUID memberId : team.getMembers()) {
@@ -112,14 +112,43 @@ public class TeamManager {
             return false;
         }
 
-        if (team.isLeader(playerToRemove)) {
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        Team.Role targetRole = team.getPlayerRole(playerToRemove.getUniqueId());
+
+        if (targetRole == Team.Role.OWNER) {
             if (team.getSize() > 1) {
-                requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "The leader cannot leave the team. Transfer leadership first or disband the team.");
+                requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "The OWNER cannot be removed. Transfer ownership first or disband the team.");
                 return false;
-            } else {
-                // Last member is leader, so disband team
-                return deleteTeam(teamName, requester); // deleteTeam already sends messages
             }
+            // If owner is the only member, let deleteTeam handle it (which checks for owner permission)
+            return deleteTeam(teamName, requester); 
+        }
+
+        // Check if requester has permission to kick (Owner can kick anyone but self, Manager can kick Members)
+        boolean canKick = false;
+        if (requesterRole == Team.Role.OWNER && !requester.getUniqueId().equals(playerToRemove.getUniqueId())) {
+            canKick = true;
+        }
+        if (requesterRole == Team.Role.MANAGER && targetRole == Team.Role.MEMBER) {
+            canKick = true;
+        }
+
+        if (!canKick && !requester.getUniqueId().equals(playerToRemove.getUniqueId())) { // Player trying to leave themselves is always allowed if not owner
+             requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "You do not have permission to remove this player.");
+             return false;
+        }
+        
+        // If player is trying to leave themselves (and is not the owner, handled above)
+        if (requester.getUniqueId().equals(playerToRemove.getUniqueId()) && targetRole != Team.Role.OWNER) {
+            // Allow self-leave
+            team.removeMember(playerToRemove);
+            playerTeamMap.remove(playerToRemove.getUniqueId());
+            saveTeams(); // Save after removing member
+            requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
+            return true;
+        } else if (!canKick) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "You do not have permission to remove this player.");
+            return false;
         }
 
         if (team.removeMember(playerToRemove)) {
@@ -132,28 +161,28 @@ public class TeamManager {
         return false;
     }
 
-    public boolean transferLeadership(String teamName, Player newLeader, Player currentLeader) {
+    public boolean transferLeadership(String teamName, Player newLeaderPlayer, Player currentLeaderPlayer) {
         Team team = getTeam(teamName);
         if (team == null) {
-            currentLeader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
+            currentLeaderPlayer.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
             return false;
         }
-        if (!team.isLeader(currentLeader)) {
-            currentLeader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the current team leader can transfer leadership.");
+        if (team.getPlayerRole(currentLeaderPlayer.getUniqueId()) != Team.Role.OWNER) {
+            currentLeaderPlayer.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the current team OWNER can transfer ownership.");
             return false;
         }
-        if (!team.isMember(newLeader)) {
-            currentLeader.sendMessage(MSG_PREFIX + ERROR_COLOR + newLeader.getName() + " is not a member of your team.");
+        if (!team.isMember(newLeaderPlayer)) {
+            currentLeaderPlayer.sendMessage(MSG_PREFIX + ERROR_COLOR + newLeaderPlayer.getName() + " is not a member of your team.");
             return false;
         }
-        if (newLeader.equals(currentLeader)){
-            currentLeader.sendMessage(MSG_PREFIX + INFO_COLOR + "You are already the leader of this team.");
+        if (newLeaderPlayer.equals(currentLeaderPlayer)){
+            currentLeaderPlayer.sendMessage(MSG_PREFIX + INFO_COLOR + "You are already the OWNER of this team.");
             return false;
         }
-        team.setLeader(newLeader.getUniqueId());
+        team.setOwner(newLeaderPlayer.getUniqueId()); // This method in Team.java now handles demoting old owner and promoting new one.
         saveTeams(); // Save after transferring leadership
-        currentLeader.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Leadership of team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " transferred to " + ACCENT_COLOR + newLeader.getName() + SUCCESS_COLOR + ".");
-        newLeader.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You are now the leader of team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
+        currentLeaderPlayer.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Ownership of team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " transferred to " + ACCENT_COLOR + newLeaderPlayer.getName() + SUCCESS_COLOR + ".");
+        newLeaderPlayer.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You are now the OWNER of team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
         return true;
     }
 
@@ -163,8 +192,9 @@ public class TeamManager {
             requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
             return false;
         }
-        if (!team.isLeader(requester)) {
-            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team leader can set the team prefix.");
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        if (requesterRole != Team.Role.OWNER && requesterRole != Team.Role.MANAGER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER or MANAGER can set the team prefix.");
             return false;
         }
         team.setPrefix(prefix);
@@ -180,8 +210,9 @@ public class TeamManager {
             requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
             return false;
         }
-        if (!team.isLeader(requester)) {
-            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team leader can set the team prefix color.");
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        if (requesterRole != Team.Role.OWNER && requesterRole != Team.Role.MANAGER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER or MANAGER can set the team prefix color.");
             return false;
         }
         // Basic validation for color code (starts with '&' and is 2 chars long, e.g., "&c")
@@ -194,6 +225,54 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix color
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix color updated. Preview: " + displayPrefix + ChatColor.RESET);
+        return true;
+    }
+
+    public boolean promotePlayerRole(String teamName, Player targetPlayer, Team.Role newRole, Player requester) {
+        Team team = getTeam(teamName);
+        if (team == null) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team " + ACCENT_COLOR + teamName + ERROR_COLOR + " not found.");
+            return false;
+        }
+
+        Team.Role requesterRole = team.getPlayerRole(requester.getUniqueId());
+        if (requesterRole != Team.Role.OWNER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team OWNER can promote or demote members.");
+            return false;
+        }
+
+        if (!team.isMember(targetPlayer)) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + targetPlayer.getName() + " is not a member of this team.");
+            return false;
+        }
+
+        Team.Role currentTargetRole = team.getPlayerRole(targetPlayer.getUniqueId());
+        if (currentTargetRole == newRole) {
+            requester.sendMessage(MSG_PREFIX + INFO_COLOR + targetPlayer.getName() + " already has the role " + ACCENT_COLOR + newRole.name() + INFO_COLOR + ".");
+            return false;
+        }
+
+        if (newRole == Team.Role.OWNER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Cannot promote to OWNER. Use /team transfer <player> instead.");
+            return false;
+        }
+        
+        if (targetPlayer.getUniqueId().equals(requester.getUniqueId()) && newRole != Team.Role.OWNER) {
+             requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "You cannot change your own role with this command.");
+             return false;
+        }
+        
+        // Prevent demoting self if owner
+        if (targetPlayer.getUniqueId().equals(requester.getUniqueId()) && currentTargetRole == Team.Role.OWNER) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "The OWNER cannot demote themselves. Transfer ownership first.");
+            return false;
+        }
+
+        team.setPlayerRole(targetPlayer.getUniqueId(), newRole);
+        saveTeams();
+
+        requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + targetPlayer.getName() + "'s role has been changed to " + ACCENT_COLOR + newRole.name() + SUCCESS_COLOR + ".");
+        targetPlayer.sendMessage(MSG_PREFIX + INFO_COLOR + "Your role in team " + ACCENT_COLOR + team.getName() + INFO_COLOR + " has been changed to " + ACCENT_COLOR + newRole.name() + INFO_COLOR + ".");
         return true;
     }
 

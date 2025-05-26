@@ -8,10 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TeamCommand implements CommandExecutor, TabCompleter {
@@ -160,6 +157,35 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
                 }
                 sendTeamInfo(player, currentTeam);
                 break;
+            case "setrole":
+                if (args.length < 3) {
+                    player.sendMessage(MSG_PREFIX + INFO_COLOR + "Usage: /team setrole <playerName> <role>");
+                    player.sendMessage(MSG_PREFIX + INFO_COLOR + "Available roles: MANAGER, MEMBER");
+                    return true;
+                }
+                Team teamForSetRole = teamManager.getPlayerTeam(player);
+                if (teamForSetRole == null) {
+                    player.sendMessage(MSG_PREFIX + ERROR_COLOR + "You are not in a team.");
+                    return true;
+                }
+                Player targetPlayerSetRole = Bukkit.getPlayer(args[1]);
+                if (targetPlayerSetRole == null) {
+                    player.sendMessage(MSG_PREFIX + ERROR_COLOR + "Player '" + ACCENT_COLOR + args[1] + ERROR_COLOR + "' not found.");
+                    return true;
+                }
+                Team.Role newRole;
+                try {
+                    newRole = Team.Role.valueOf(args[2].toUpperCase());
+                    if (newRole == Team.Role.OWNER) {
+                        player.sendMessage(MSG_PREFIX + ERROR_COLOR + "Cannot set role to OWNER using this command. Use /team transfer.");
+                        return true;
+                    }
+                } catch (IllegalArgumentException e) {
+                    player.sendMessage(MSG_PREFIX + ERROR_COLOR + "Invalid role '" + ACCENT_COLOR + args[2] + ERROR_COLOR + "'. Available roles: MANAGER, MEMBER.");
+                    return true;
+                }
+                teamManager.promotePlayerRole(teamForSetRole.getName(), targetPlayerSetRole, newRole, player);
+                break;
             default:
                 sendHelpMessage(player);
                 break;
@@ -170,66 +196,87 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
     private void sendHelpMessage(Player player) {
         player.sendMessage(MSG_PREFIX + ACCENT_COLOR + "--- TeamSmith Help ---");
         player.sendMessage(INFO_COLOR + "/team create <teamName>" + ChatColor.GRAY + " - Creates a new team.");
-        player.sendMessage(INFO_COLOR + "/team delete" + ChatColor.GRAY + " - Deletes your current team (leader only).");
+        player.sendMessage(INFO_COLOR + "/team delete" + ChatColor.GRAY + " - Deletes your current team (OWNER only).");
         player.sendMessage(INFO_COLOR + "/team invite <playerName>" + ChatColor.GRAY + " - Invites a player to your team.");
-        player.sendMessage(INFO_COLOR + "/team kick <playerName>" + ChatColor.GRAY + " - Kicks a player from your team (leader only).");
+        player.sendMessage(INFO_COLOR + "/team kick <playerName>" + ChatColor.GRAY + " - Kicks a player from your team (OWNER/MANAGER only).");
         player.sendMessage(INFO_COLOR + "/team leave" + ChatColor.GRAY + " - Leaves your current team.");
-        player.sendMessage(INFO_COLOR + "/team transfer <newLeaderName>" + ChatColor.GRAY + " - Transfers leadership (leader only).");
-        player.sendMessage(INFO_COLOR + "/team prefix <newPrefix>" + ChatColor.GRAY + " - Sets your team's chat prefix (leader only).");
-        player.sendMessage(INFO_COLOR + "/team prefixcolor <colorcode>" + ChatColor.GRAY + " - Sets your team's prefix color (e.g., &c) (leader only).");
+        player.sendMessage(INFO_COLOR + "/team transfer <newLeaderName>" + ChatColor.GRAY + " - Transfers ownership (OWNER only).");
+        player.sendMessage(INFO_COLOR + "/team setrole <playerName> <role>" + ChatColor.GRAY + " - Sets a player's role (OWNER only). Roles: MANAGER, MEMBER.");
+        player.sendMessage(INFO_COLOR + "/team prefix <newPrefix>" + ChatColor.GRAY + " - Sets your team's chat prefix (OWNER/MANAGER only).");
+        player.sendMessage(INFO_COLOR + "/team prefixcolor <colorcode>" + ChatColor.GRAY + " - Sets your team's prefix color (OWNER/MANAGER only).");
         player.sendMessage(INFO_COLOR + "/team info" + ChatColor.GRAY + " - Shows information about your current team.");
         player.sendMessage(MSG_PREFIX + ACCENT_COLOR + "--------------------");
     }
 
     private void sendTeamInfo(Player player, Team team) {
         player.sendMessage(MSG_PREFIX + ACCENT_COLOR + "--- Team: " + team.getName() + " ---");
-        Player leader = Bukkit.getPlayer(team.getLeader());
-        player.sendMessage(INFO_COLOR + "Leader: " + ACCENT_COLOR + (leader != null ? leader.getName() : "Unknown (Offline)"));
+        UUID ownerId = team.getOwner();
+        Player owner = ownerId != null ? Bukkit.getPlayer(ownerId) : null;
+        player.sendMessage(INFO_COLOR + "Owner: " + ACCENT_COLOR + (owner != null ? owner.getName() : (ownerId != null ? "Offline UUID: " + ownerId.toString().substring(0,8) : "Unknown")));
+        
         String prefixText = team.getPrefix() == null || team.getPrefix().isEmpty() ? "Not set" : team.getPrefix();
         String prefixColor = team.getPrefixColor();
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', prefixColor + prefixText) + ChatColor.RESET;
         player.sendMessage(INFO_COLOR + "Prefix: " + displayPrefix + (prefixText.equals("Not set") ? "" : INFO_COLOR + " (Raw: " + ACCENT_COLOR + prefixColor + prefixText + INFO_COLOR + ")"));
         player.sendMessage(INFO_COLOR + "Members (" + ACCENT_COLOR + team.getSize() + INFO_COLOR + "):");
-        for (UUID memberId : team.getMembers()) {
+
+        Map<UUID, Team.Role> memberRoles = team.getMemberRoles();
+        List<UUID> sortedMembers = new ArrayList<>(memberRoles.keySet());
+        // Sort members to show Owner first, then Managers, then Members
+        sortedMembers.sort(Comparator.comparing((UUID id) -> memberRoles.get(id)).reversed());
+
+        for (UUID memberId : sortedMembers) {
             Player member = Bukkit.getPlayer(memberId);
-            player.sendMessage(ChatColor.GRAY + "- " + ACCENT_COLOR + (member != null ? member.getName() : "Unknown (Offline)"));
+            Team.Role role = memberRoles.get(memberId);
+            String roleString = ACCENT_COLOR + "(" + role.name() + ")";
+            player.sendMessage(ChatColor.GRAY + "- " + ACCENT_COLOR + (member != null ? member.getName() : "Offline UUID: " + memberId.toString().substring(0,8)) + " " + roleString);
         }
         player.sendMessage(MSG_PREFIX + ACCENT_COLOR + "--------------------");
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!(sender instanceof Player)) {
-            return null;
-        }
-        Player player = (Player) sender;
         List<String> completions = new ArrayList<>();
+        List<String> subCommands = Arrays.asList("create", "delete", "disband", "invite", "kick", "leave", "transfer", "prefix", "prefixcolor", "info", "setrole");
 
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("create", "delete", "invite", "kick", "leave", "transfer", "prefix", "prefixcolor", "info");
-            for (String sub : subCommands) {
-                if (sub.startsWith(args[0].toLowerCase())) {
-                    completions.add(sub);
+            for (String subCmd : subCommands) {
+                if (subCmd.startsWith(args[0].toLowerCase())) {
+                    completions.add(subCmd);
                 }
             }
         } else if (args.length == 2) {
             String subCommand = args[0].toLowerCase();
-            if (subCommand.equals("invite") || subCommand.equals("kick") || subCommand.equals("transfer")) {
-                // Suggest online players
-                completions.addAll(Bukkit.getOnlinePlayers().stream()
-                        .map(Player::getName)
-                        .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
-                        .collect(Collectors.toList()));
-            } else if (subCommand.equals("prefixcolor")) {
-                // Suggest color codes
-                List<String> colorCodes = Arrays.asList("&0", "&1", "&2", "&3", "&4", "&5", "&6", "&7", "&8", "&9", "&a", "&b", "&c", "&d", "&e", "&f", "&k", "&l", "&m", "&n", "&o", "&r");
-                for (String code : colorCodes) {
-                    if (code.startsWith(args[1].toLowerCase())) {
-                        completions.add(code);
+            // Player name suggestions for relevant commands
+            if (Arrays.asList("invite", "kick", "transfer", "setrole").contains(subCommand)) {
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        completions.add(onlinePlayer.getName());
                     }
                 }
             }
+            // Color code suggestions for prefixcolor
+            if (subCommand.equals("prefixcolor")) {
+                List<String> colorCodes = Arrays.asList("&0", "&1", "&2", "&3", "&4", "&5", "&6", "&7", "&8", "&9", "&a", "&b", "&c", "&d", "&e", "&f", "&k", "&l", "&m", "&n", "&o", "&r");
+                for (String color : colorCodes) {
+                    if (color.startsWith(args[1].toLowerCase())) {
+                        completions.add(color);
+                    }
+                }
+            }
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("setrole")) {
+            // Role suggestions for setrole command
+            List<String> roles = Arrays.stream(Team.Role.values())
+                                       .filter(role -> role != Team.Role.OWNER) // Don't suggest OWNER for setrole
+                                       .map(Enum::name)
+                                       .collect(Collectors.toList());
+            for (String role : roles) {
+                if (role.toLowerCase().startsWith(args[2].toLowerCase())) {
+                    completions.add(role);
+                }
+            }
         }
+
         return completions;
     }
 }
