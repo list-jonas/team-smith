@@ -81,11 +81,18 @@ public class Team {
 
         // === deserialize named warps if present ===
         Object warpsObj = data.get("warps");
-        if (warpsObj instanceof Map) {
-            // cast down to the same shape you serialized: Map<String,Map<String,Object>>
-            Map<String, Map<String,Object>> warpsData =
-                    (Map<String, Map<String,Object>>) warpsObj;
-            for (Map.Entry<String, Map<String,Object>> e : warpsData.entrySet()) {
+        if (warpsObj instanceof MemorySection) {
+            MemorySection warpsSection = (MemorySection) warpsObj;
+            for (String warpKey : warpsSection.getKeys(false)) {
+                Map<String, Object> warpData = warpsSection.getConfigurationSection(warpKey).getValues(false);
+                Location loc = LocationUtil.deserializeLocation(warpData);
+                if (loc != null) {
+                    this.warps.put(warpKey, loc);
+                }
+            }
+        } else if (warpsObj instanceof Map) {
+            Map<String, Map<String, Object>> warpsData = (Map<String, Map<String, Object>>) warpsObj;
+            for (Map.Entry<String, Map<String, Object>> e : warpsData.entrySet()) {
                 Location loc = LocationUtil.deserializeLocation(e.getValue());
                 if (loc != null) {
                     this.warps.put(e.getKey(), loc);
