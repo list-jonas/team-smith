@@ -1,9 +1,12 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.model;
 
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import org.bukkit.Location;
+import com.listjonas.teamSmith.util.LocationUtil;
 
 public class Team {
     private String name;
@@ -19,6 +22,9 @@ public class Team {
         MEMBER
     }
 
+    private Location homeLocation;
+    private Map<String, Location> warps = new HashMap<>(); // up to 3 named warps
+
     // Constructor for creating a new team
     public Team(String name, Player leaderPlayer) {
         this.name = name;
@@ -28,6 +34,8 @@ public class Team {
         this.prefixColor = "&f"; // Default to white color
         this.friendlyFireEnabled = true; // Default to true (friendly fire enabled)
         this.teamMotd = ""; // Default to empty MOTD
+        this.homeLocation = null;
+        this.warps = new HashMap<>();
     }
 
     // Constructor for loading a team from data
@@ -40,7 +48,17 @@ public class Team {
         this.teamMotd = (String) data.getOrDefault("teamMotd", ""); // Default to empty if not found
 
         this.memberRoles = new HashMap<>();
-        Map<String, String> rolesData = (Map<String, String>) data.get("memberRoles");
+        Object rolesObj = data.get("memberRoles");
+        Map<String, String> rolesData = null;
+        if (rolesObj instanceof MemorySection) {
+            rolesData = new HashMap<>();
+            MemorySection section = (MemorySection) rolesObj;
+            for (String key : section.getKeys(false)) {
+                rolesData.put(key, section.getString(key));
+            }
+        } else if (rolesObj instanceof Map) {
+            rolesData = (Map<String, String>) rolesObj;
+        }
         if (rolesData != null) {
             for (Map.Entry<String, String> entry : rolesData.entrySet()) {
                 try {
@@ -48,21 +66,37 @@ public class Team {
                 } catch (IllegalArgumentException e) {
                     // Handle cases where role string is invalid or UUID is malformed
                     System.err.println("Error loading role for team " + name + ": Invalid role or UUID string " + entry.getValue() + " / " + entry.getKey());
-                    // Optionally, assign a default role or skip this member
                 }
             }
         }
 
-        // Backwards compatibility for old data structure (leader and members list)
-        if (this.memberRoles.isEmpty() && data.containsKey("leader") && data.containsKey("members")) {
-            UUID oldLeader = UUID.fromString((String) data.get("leader"));
-            this.memberRoles.put(oldLeader, Role.OWNER);
-            List<String> memberUuids = (List<String>) data.get("members");
-            if (memberUuids != null) {
-                memberUuids.stream()
-                    .map(UUID::fromString)
-                    .filter(uuid -> !uuid.equals(oldLeader)) // Ensure leader isn't added again as member
-                    .forEach(uuid -> this.memberRoles.put(uuid, Role.MEMBER));
+        // === deserialize homeLocation if present ===
+        Object homeObj = data.get("homeLocation");
+        if (homeObj instanceof Map) {
+            // safe cast because we serialized it as Map<String,Object>
+            this.homeLocation = LocationUtil.deserializeLocation(
+                    (Map<String,Object>) homeObj
+            );
+        }
+
+        // === deserialize named warps if present ===
+        Object warpsObj = data.get("warps");
+        if (warpsObj instanceof MemorySection) {
+            MemorySection warpsSection = (MemorySection) warpsObj;
+            for (String warpKey : warpsSection.getKeys(false)) {
+                Map<String, Object> warpData = warpsSection.getConfigurationSection(warpKey).getValues(false);
+                Location loc = LocationUtil.deserializeLocation(warpData);
+                if (loc != null) {
+                    this.warps.put(warpKey, loc);
+                }
+            }
+        } else if (warpsObj instanceof Map) {
+            Map<String, Map<String, Object>> warpsData = (Map<String, Map<String, Object>>) warpsObj;
+            for (Map.Entry<String, Map<String, Object>> e : warpsData.entrySet()) {
+                Location loc = LocationUtil.deserializeLocation(e.getValue());
+                if (loc != null) {
+                    this.warps.put(e.getKey(), loc);
+                }
             }
         }
     }
@@ -78,8 +112,18 @@ public class Team {
             serializedRoles.put(entry.getKey().toString(), entry.getValue().name());
         }
         data.put("memberRoles", serializedRoles);
-        // data.put("leader", getOwner().toString()); // Store owner explicitly if needed, or derive from roles
-        // data.put("members", members.stream().map(UUID::toString).collect(Collectors.toList())); // Old serialization
+        // Serialize homeLocation if present
+        if (homeLocation != null) {
+            data.put("homeLocation", LocationUtil.serializeLocation(homeLocation));
+        }
+        // Serialize warps if present
+        if (warps != null && !warps.isEmpty()) {
+            Map<String, Map<String, Object>> serializedWarps = new HashMap<>();
+            for (Map.Entry<String, org.bukkit.Location> entry : warps.entrySet()) {
+                serializedWarps.put(entry.getKey(), LocationUtil.serializeLocation(entry.getValue()));
+            }
+            data.put("warps", serializedWarps);
+        }
         return data;
     }
 
@@ -104,14 +148,14 @@ public class Team {
         }
         memberRoles.put(newOwnerUuid, Role.OWNER);
         if (!memberRoles.containsKey(newOwnerUuid)) { // If new owner wasn't a member, add them
-             // This case should ideally be handled by ensuring the new owner is already a member
+            // This case should ideally be handled by ensuring the new owner is already a member
         }
     }
 
     public Set<UUID> getMembers() {
         return new HashSet<>(memberRoles.keySet());
     }
-    
+
     public Map<UUID, Role> getMemberRoles() {
         return Collections.unmodifiableMap(memberRoles);
     }
@@ -185,5 +229,35 @@ public class Team {
 
     public void setTeamMotd(String teamMotd) {
         this.teamMotd = teamMotd;
+    }
+
+    public Location getHomeLocation() {
+        return homeLocation;
+    }
+
+    public void setHomeLocation(Location homeLocation) {
+        this.homeLocation = homeLocation;
+    }
+
+    public void deleteHomeLocation() {
+        this.homeLocation = null;
+    }
+
+    public Map<String, Location> getWarps() {
+        return Collections.unmodifiableMap(warps);
+    }
+
+    public boolean setWarp(String name, Location location) {
+        if (warps.size() >= 3 && !warps.containsKey(name)) return false;
+        warps.put(name, location);
+        return true;
+    }
+
+    public boolean deleteWarp(String name) {
+        return warps.remove(name) != null;
+    }
+
+    public Location getWarp(String name) {
+        return warps.get(name);
     }
 }

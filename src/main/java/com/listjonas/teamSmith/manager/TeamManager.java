@@ -1,5 +1,8 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.manager;
 
+import com.listjonas.teamSmith.TeamSmith;
+import com.listjonas.teamSmith.data.DataManager;
+import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
@@ -7,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.listjonas.teamSmith.TeamCommand.*;
+import static com.listjonas.teamSmith.commands.TeamCommand.*;
 
 public class TeamManager {
     private final TeamSmith plugin;
@@ -16,13 +19,31 @@ public class TeamManager {
     private final DataManager dataManager;
     private static final String TEAMS_DATA_FILE = "teams.yml";
     private static final String TEAMS_CONFIG_PATH = "teams";
+    private static TeamManager instance;
 
-    public TeamManager(TeamSmith plugin) {
+    private TeamManager(TeamSmith plugin) {
         this.plugin = plugin;
         this.teams = new HashMap<>();
         this.playerTeamMap = new HashMap<>();
         this.dataManager = new DataManager(plugin, TEAMS_DATA_FILE);
         loadTeams();
+    }
+    /**
+     * Singleton instance of TeamManager.
+     * Ensures only one instance exists throughout the plugin lifecycle.
+     */
+    public static TeamManager createInstance(TeamSmith plugin) {
+        if (instance == null) {
+            instance = new TeamManager(plugin);
+        }
+        return instance;
+    }
+
+    public static TeamManager getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("TeamManager has not been initialized. Call createInstance() first.");
+        }
+        return instance;
     }
 
     public boolean createTeam(String teamName, Player leader) {
