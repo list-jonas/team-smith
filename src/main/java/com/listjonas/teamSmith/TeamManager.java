@@ -5,18 +5,21 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import com.listjonas.teamsmith.Team;
 
 public class TeamManager {
     private final TeamSmith plugin;
-    private final Map<String, com.listjonas.teamsmith.Team> teams;
+    private final Map<String, Team> teams;
     private final Map<UUID, String> playerTeamMap; // To quickly find a player's team
+    private final DataManager dataManager;
+    private static final String TEAMS_DATA_FILE = "teams.yml";
+    private static final String TEAMS_CONFIG_PATH = "teams";
 
     public TeamManager(TeamSmith plugin) {
         this.plugin = plugin;
         this.teams = new HashMap<>();
         this.playerTeamMap = new HashMap<>();
-        // Load teams from storage if implemented
+        this.dataManager = new DataManager(plugin, TEAMS_DATA_FILE);
+        loadTeams();
     }
 
     public boolean createTeam(String teamName, Player leader) {
@@ -31,6 +34,7 @@ public class TeamManager {
         Team newTeam = new Team(teamName, leader);
         teams.put(teamName.toLowerCase(), newTeam);
         playerTeamMap.put(leader.getUniqueId(), teamName.toLowerCase());
+        saveTeams(); // Save after creating
         leader.sendMessage("Team '" + teamName + "' created successfully!");
         return true;
     }
@@ -49,6 +53,8 @@ public class TeamManager {
             playerTeamMap.remove(memberId);
         }
         teams.remove(teamName.toLowerCase());
+        dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, teamName.toLowerCase()); // Remove from data file
+        // saveTeams(); // Alternative: resave all, but deleteDataEntry is more direct for removal
         requester.sendMessage("Team '" + teamName + "' has been disbanded.");
         // Notify members if needed
         return true;
@@ -80,6 +86,7 @@ public class TeamManager {
         }
         if (team.addMember(playerToAdd)) {
             playerTeamMap.put(playerToAdd.getUniqueId(), teamName.toLowerCase());
+            saveTeams(); // Save after adding member
             requester.sendMessage(playerToAdd.getName() + " has been added to team '" + teamName + "'.");
             playerToAdd.sendMessage("You have joined team '" + teamName + "'.");
             return true;
@@ -110,6 +117,7 @@ public class TeamManager {
 
         if (team.removeMember(playerToRemove)) {
             playerTeamMap.remove(playerToRemove.getUniqueId());
+            saveTeams(); // Save after removing member
             requester.sendMessage(playerToRemove.getName() + " has been removed from team '" + teamName + "'.");
             playerToRemove.sendMessage("You have been removed from team '" + teamName + "'.");
             return true;
@@ -132,6 +140,7 @@ public class TeamManager {
             return false;
         }
         team.setLeader(newLeader.getUniqueId());
+        saveTeams(); // Save after transferring leadership
         currentLeader.sendMessage("Leadership of team '" + teamName + "' transferred to " + newLeader.getName() + ".");
         newLeader.sendMessage("You are now the leader of team '" + teamName + "'.");
         return true;
@@ -148,11 +157,34 @@ public class TeamManager {
             return false;
         }
         team.setPrefix(prefix);
+        saveTeams(); // Save after setting prefix
         requester.sendMessage("Team '" + teamName + "' prefix set to '" + prefix + "'.");
         return true;
     }
-    
-    // Consider adding methods for saving/loading teams to a file (e.g., YAML or JSON)
-    // public void loadTeams() { ... }
-    // public void saveTeams() { ... }
+
+    public void loadTeams() {
+        Map<String, Map<String, Object>> teamsData = dataManager.loadData(TEAMS_CONFIG_PATH);
+        if (teamsData.isEmpty()) {
+            plugin.getLogger().info("No teams found in " + TEAMS_DATA_FILE + ", or file is empty.");
+            return;
+        }
+        for (Map.Entry<String, Map<String, Object>> entry : teamsData.entrySet()) {
+            String teamName = entry.getKey();
+            Team team = new Team(teamName, entry.getValue());
+            teams.put(teamName.toLowerCase(), team);
+            for (UUID memberId : team.getMembers()) {
+                playerTeamMap.put(memberId, teamName.toLowerCase());
+            }
+        }
+        plugin.getLogger().info("Loaded " + teams.size() + " teams from " + TEAMS_DATA_FILE);
+    }
+
+    public void saveTeams() {
+        Map<String, Map<String, Object>> teamsToSave = new HashMap<>();
+        for (Map.Entry<String, Team> entry : teams.entrySet()) {
+            teamsToSave.put(entry.getKey(), entry.getValue().serialize());
+        }
+        dataManager.saveData(TEAMS_CONFIG_PATH, teamsToSave);
+        plugin.getLogger().info("Saved " + teamsToSave.size() + " teams to " + TEAMS_DATA_FILE);
+    }
 }

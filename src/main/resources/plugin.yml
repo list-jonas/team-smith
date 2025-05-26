@@ -4,9 +4,3 @@ main: com.listjonas.teamSmith.TeamSmith
 api-version: 1.17 # Or your target server version, e.g., 1.18, 1.19, 1.20
 author: YourName
 description: A plugin to manage teams with prefixes.
-
-commands:
-  team:
-    description: Main command for TeamSmith plugin.
-    usage: /team <subcommand> [args]
-    aliases: [ts, myteam]

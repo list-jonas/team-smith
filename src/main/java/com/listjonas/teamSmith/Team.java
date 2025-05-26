@@ -1,10 +1,9 @@
-package com.listjonas.teamsmith;
+package com.listjonas.teamSmith;
 
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Team {
     private String name;
@@ -12,13 +11,33 @@ public class Team {
     private Set<UUID> members;
     private String prefix;
 
-    public Team(String name, Player leader) {
+    // Constructor for creating a new team
+    public Team(String name, Player leaderPlayer) {
         this.name = name;
-        this.leader = leader.getUniqueId();
+        this.leader = leaderPlayer.getUniqueId();
         this.members = new HashSet<>();
-        this.members.add(leader.getUniqueId());
+        this.members.add(leaderPlayer.getUniqueId());
         this.prefix = "[" + name + "] "; // Default prefix
     }
+
+    // Constructor for loading a team from data
+    @SuppressWarnings("unchecked")
+    public Team(String name, Map<String, Object> data) {
+        this.name = name;
+        this.leader = UUID.fromString((String) data.get("leader"));
+        this.prefix = (String) data.get("prefix");
+        List<String> memberUuids = (List<String>) data.get("members");
+        this.members = memberUuids.stream().map(UUID::fromString).collect(Collectors.toSet());
+    }
+
+    public Map<String, Object> serialize() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("leader", leader.toString());
+        data.put("prefix", prefix);
+        data.put("members", members.stream().map(UUID::toString).collect(Collectors.toList()));
+        return data;
+    }
+
 
     public String getName() {
         return name;

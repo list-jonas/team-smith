@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.listjonas.teamsmith.Team;
-
 public class TeamCommand implements CommandExecutor, TabCompleter {
 
     private final TeamSmith plugin;
