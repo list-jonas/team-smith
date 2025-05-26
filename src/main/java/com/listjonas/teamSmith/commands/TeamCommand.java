@@ -39,7 +39,12 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("setrole",new SetRoleHandler());
         handlers.put("motd",new SetMotdHandler());
         handlers.put("friendlyfire",new FriendlyFireHandler());
-        handlers.put("ff",handlers.get("friendlyfire"));
+        handlers.put("sethome", new SetHomeHandler());
+        handlers.put("delhome", new DeleteHomeHandler());
+        handlers.put("home", new TpHomeHandler());
+        handlers.put("setwarp", new SetWarpHandler());
+        handlers.put("delwarp", new DeleteWarpHandler());
+        handlers.put("warp", new TpWarpHandler());
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){

@@ -5,6 +5,9 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+import org.bukkit.Location;
+import com.listjonas.teamSmith.util.LocationUtil;
+
 public class Team {
     private String name;
     private Map<UUID, Role> memberRoles;
@@ -19,6 +22,9 @@ public class Team {
         MEMBER
     }
 
+    private Location homeLocation;
+    private Map<String, Location> warps = new HashMap<>(); // up to 3 named warps
+
     // Constructor for creating a new team
     public Team(String name, Player leaderPlayer) {
         this.name = name;
@@ -28,6 +34,8 @@ public class Team {
         this.prefixColor = "&f"; // Default to white color
         this.friendlyFireEnabled = true; // Default to true (friendly fire enabled)
         this.teamMotd = ""; // Default to empty MOTD
+        this.homeLocation = null;
+        this.warps = new HashMap<>();
     }
 
     // Constructor for loading a team from data
@@ -70,9 +78,9 @@ public class Team {
             List<String> memberUuids = (List<String>) data.get("members");
             if (memberUuids != null) {
                 memberUuids.stream()
-                    .map(UUID::fromString)
-                    .filter(uuid -> !uuid.equals(oldLeader)) // Ensure leader isn't added again as member
-                    .forEach(uuid -> this.memberRoles.put(uuid, Role.MEMBER));
+                        .map(UUID::fromString)
+                        .filter(uuid -> !uuid.equals(oldLeader)) // Ensure leader isn't added again as member
+                        .forEach(uuid -> this.memberRoles.put(uuid, Role.MEMBER));
             }
         }
     }
@@ -114,14 +122,14 @@ public class Team {
         }
         memberRoles.put(newOwnerUuid, Role.OWNER);
         if (!memberRoles.containsKey(newOwnerUuid)) { // If new owner wasn't a member, add them
-             // This case should ideally be handled by ensuring the new owner is already a member
+            // This case should ideally be handled by ensuring the new owner is already a member
         }
     }
 
     public Set<UUID> getMembers() {
         return new HashSet<>(memberRoles.keySet());
     }
-    
+
     public Map<UUID, Role> getMemberRoles() {
         return Collections.unmodifiableMap(memberRoles);
     }
@@ -195,5 +203,35 @@ public class Team {
 
     public void setTeamMotd(String teamMotd) {
         this.teamMotd = teamMotd;
+    }
+
+    public Location getHomeLocation() {
+        return homeLocation;
+    }
+
+    public void setHomeLocation(Location homeLocation) {
+        this.homeLocation = homeLocation;
+    }
+
+    public void deleteHomeLocation() {
+        this.homeLocation = null;
+    }
+
+    public Map<String, Location> getWarps() {
+        return Collections.unmodifiableMap(warps);
+    }
+
+    public boolean setWarp(String name, Location location) {
+        if (warps.size() >= 3 && !warps.containsKey(name)) return false;
+        warps.put(name, location);
+        return true;
+    }
+
+    public boolean deleteWarp(String name) {
+        return warps.remove(name) != null;
+    }
+
+    public Location getWarp(String name) {
+        return warps.get(name);
     }
 }
