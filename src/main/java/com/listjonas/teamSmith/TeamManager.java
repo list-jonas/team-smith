@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.listjonas.teamSmith.TeamCommand.*;
+
 public class TeamManager {
     private final TeamSmith plugin;
     private final Map<String, Team> teams;
@@ -14,13 +16,6 @@ public class TeamManager {
     private final DataManager dataManager;
     private static final String TEAMS_DATA_FILE = "teams.yml";
     private static final String TEAMS_CONFIG_PATH = "teams";
-
-    // Define some standard colors for messages
-    private static final String MSG_PREFIX = ChatColor.GOLD + "[TeamSmith] " + ChatColor.RESET;
-    private static final String SUCCESS_COLOR = ChatColor.GREEN.toString();
-    private static final String ERROR_COLOR = ChatColor.RED.toString();
-    private static final String INFO_COLOR = ChatColor.YELLOW.toString();
-    private static final String ACCENT_COLOR = ChatColor.AQUA.toString();
 
     public TeamManager(TeamSmith plugin) {
         this.plugin = plugin;

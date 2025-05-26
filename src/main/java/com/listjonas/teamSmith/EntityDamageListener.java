@@ -5,6 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+import static com.listjonas.teamSmith.TeamCommand.INFO_COLOR;
+
 public class EntityDamageListener implements Listener {
 
     private final TeamManager teamManager;
@@ -30,7 +32,7 @@ public class EntityDamageListener implements Listener {
             if (!victimTeam.isFriendlyFireEnabled()) {
                 event.setCancelled(true); // Cancel damage if friendly fire is off
                 // Send a message to the attacker
-                attacker.sendMessage(ChatColor.RED + "Friendly fire is disabled in your team!");
+                attacker.sendMessage(INFO_COLOR + "Friendly fire is disabled in your team!");
             }
         }
     }

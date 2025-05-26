@@ -17,11 +17,11 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
     private final TeamManager teamManager;
 
     // Define some standard colors for messages, aligning with TeamManager
-    private static final String MSG_PREFIX = ChatColor.GOLD + "[TeamSmith] " + ChatColor.RESET;
-    private static final String SUCCESS_COLOR = ChatColor.GREEN.toString();
-    private static final String ERROR_COLOR = ChatColor.RED.toString();
-    private static final String INFO_COLOR = ChatColor.YELLOW.toString();
-    private static final String ACCENT_COLOR = ChatColor.AQUA.toString();
+    public static final String MSG_PREFIX = ChatColor.GOLD + "[TeamSmith] " + ChatColor.RESET;
+    public static final String SUCCESS_COLOR = ChatColor.GREEN.toString();
+    public static final String ERROR_COLOR = ChatColor.RED.toString();
+    public static final String INFO_COLOR = ChatColor.YELLOW.toString();
+    public static final String ACCENT_COLOR = ChatColor.AQUA.toString();
 
     public TeamCommand(TeamSmith plugin, TeamManager teamManager) {
         this.plugin = plugin;
