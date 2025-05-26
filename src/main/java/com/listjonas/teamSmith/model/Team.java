@@ -1,9 +1,8 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.model;
 
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Team {
     private String name;

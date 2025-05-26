@@ -1,5 +1,6 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.data;
 
+import com.listjonas.teamSmith.TeamSmith;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

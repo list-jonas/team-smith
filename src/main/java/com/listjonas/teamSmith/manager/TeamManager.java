@@ -1,5 +1,8 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.manager;
 
+import com.listjonas.teamSmith.TeamSmith;
+import com.listjonas.teamSmith.data.DataManager;
+import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
@@ -7,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.listjonas.teamSmith.TeamCommand.*;
+import static com.listjonas.teamSmith.commands.TeamCommand.*;
 
 public class TeamManager {
     private final TeamSmith plugin;

@@ -1,5 +1,8 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.commands;
 
+import com.listjonas.teamSmith.TeamSmith;
+import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

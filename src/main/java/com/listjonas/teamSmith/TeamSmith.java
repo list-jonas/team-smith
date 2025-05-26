@@ -1,8 +1,11 @@
 package com.listjonas.teamSmith;
 
+import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.listeners.EntityDamageListener;
+import com.listjonas.teamSmith.listeners.PlayerChatListener;
+import com.listjonas.teamSmith.listeners.PlayerJoinListener;
+import com.listjonas.teamSmith.manager.TeamManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.command.PluginCommand;
-import java.util.logging.Level;
 
 public class TeamSmith extends JavaPlugin {
 

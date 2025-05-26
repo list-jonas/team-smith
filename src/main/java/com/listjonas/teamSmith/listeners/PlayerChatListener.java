@@ -1,5 +1,7 @@
-package com.listjonas.teamSmith;
+package com.listjonas.teamSmith.listeners;
 
+import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
