@@ -1,0 +1,8 @@
+name: TeamSmith
+version: '1.0-SNAPSHOT'
+main: com.listjonas.teamSmith.TeamSmith
+api-version: '1.21'
+authors:
+  - Jonas List
+website: https://www.listjonas.com
+description: A plugin for managing teams in Minecraft.
