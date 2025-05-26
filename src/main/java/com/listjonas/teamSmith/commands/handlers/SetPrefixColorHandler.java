@@ -5,6 +5,10 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class SetPrefixColorHandler implements SubCommandExecutor {
 
     @Override
@@ -32,5 +36,17 @@ public class SetPrefixColorHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Sets your team's prefix color (OWNER/MANAGER only).";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // Suggest Minecraft color codes for the first argument
+        if (args.length == 1) {
+            return Arrays.asList(
+                "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold",
+                "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"
+            );
+        }
+        return Collections.emptyList();
     }
 }

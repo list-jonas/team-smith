@@ -5,6 +5,10 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class FriendlyFireHandler implements SubCommandExecutor {
 
     @Override
@@ -43,5 +47,14 @@ public class FriendlyFireHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Toggles friendly fire for your team. (Aliases: /team ff)";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // Suggest 'on' and 'off' for the first argument
+        if (args.length == 1) {
+            return Arrays.asList("on", "off");
+        }
+        return Collections.emptyList();
     }
 }

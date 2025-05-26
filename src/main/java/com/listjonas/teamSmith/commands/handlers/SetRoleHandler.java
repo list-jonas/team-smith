@@ -6,13 +6,18 @@ import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SetRoleHandler implements SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length < 2) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Usage: /team setrole " + getArgumentUsage());
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Available roles: MANAGER, MEMBER");
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Available roles: " + TeamCommand.ACCENT_COLOR + "MANAGER, MEMBER");
             return true;
         }
         Team teamForSetRole = teamManager.getPlayerTeam(player);
@@ -33,7 +38,7 @@ public class SetRoleHandler implements SubCommandExecutor {
                 return true;
             }
         } catch (IllegalArgumentException e) {
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Invalid role '" + TeamCommand.ACCENT_COLOR + args[1] + TeamCommand.ERROR_COLOR + "'. Available roles: MANAGER, MEMBER.");
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Invalid role '" + TeamCommand.ACCENT_COLOR + args[1] + TeamCommand.ERROR_COLOR + "'. Available roles: " + TeamCommand.ACCENT_COLOR + "MANAGER, MEMBER");
             return true;
         }
         teamManager.promotePlayerRole(teamForSetRole.getName(), targetPlayerSetRole, newRole, player);
@@ -48,5 +53,19 @@ public class SetRoleHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Sets a player's role (OWNER only). Roles: MANAGER, MEMBER.";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        if (args.length == 1) {
+            // Suggest roles for the first argument
+            return Arrays.asList("manager", "member");
+        } else if (args.length == 2) {
+            // Suggest online player names for the second argument
+            return Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

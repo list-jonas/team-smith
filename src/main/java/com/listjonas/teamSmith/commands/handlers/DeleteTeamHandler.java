@@ -5,6 +5,9 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public class DeleteTeamHandler implements SubCommandExecutor {
 
     @Override
@@ -26,5 +29,11 @@ public class DeleteTeamHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Deletes your current team (OWNER only).";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // No tab completions for delete/disband
+        return Collections.emptyList();
     }
 }

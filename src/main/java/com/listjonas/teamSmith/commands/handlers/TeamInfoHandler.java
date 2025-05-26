@@ -57,4 +57,10 @@ public class TeamInfoHandler implements SubCommandExecutor {
     public String getDescription() {
         return "Shows information about your current team.";
     }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // No tab completions for info
+        return Collections.emptyList();
+    }
 }

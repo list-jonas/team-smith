@@ -4,6 +4,9 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public class CreateTeamHandler implements SubCommandExecutor {
 
     @Override
@@ -24,5 +27,14 @@ public class CreateTeamHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Creates a new team.";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // Suggest <teamName> as a placeholder for the required argument
+        if (args.length == 1) {
+            return Collections.singletonList("<teamName>");
+        }
+        return Collections.emptyList();
     }
 }

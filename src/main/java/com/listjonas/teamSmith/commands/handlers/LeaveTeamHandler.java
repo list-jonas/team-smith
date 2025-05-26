@@ -5,6 +5,9 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public class LeaveTeamHandler implements SubCommandExecutor {
 
     @Override
@@ -26,5 +29,11 @@ public class LeaveTeamHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Leaves your current team.";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // No tab completions for leave
+        return Collections.emptyList();
     }
 }

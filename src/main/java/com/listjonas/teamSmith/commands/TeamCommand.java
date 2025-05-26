@@ -58,13 +58,14 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         p.sendMessage(MSG_PREFIX+ACCENT_COLOR+"--------------------");
     }
 
-    @Override public List<String> onTabComplete(CommandSender sender,Command command,String alias,String[] args){
-        if(args.length==1){
-            return handlers.keySet().stream().filter(k->k.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            return handlers.keySet().stream()
+                .filter(k -> k.startsWith(args[0].toLowerCase()))
+                .collect(Collectors.toList());
         }
-        String sub=args[0].toLowerCase();
-        SubCommandExecutor h=handlers.get(sub);
-        if(h instanceof TabCompleter) return ((TabCompleter)h).onTabComplete(sender,command,alias,Arrays.copyOfRange(args,1,args.length));
-        return Collections.emptyList();
+        SubCommandExecutor handler = handlers.get(args[0].toLowerCase());
+        return handler != null ? handler.getTabCompletions(args) : Collections.emptyList();
     }
 }

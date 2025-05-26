@@ -1,5 +1,6 @@
 package com.listjonas.teamSmith.model;
 
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -39,7 +40,17 @@ public class Team {
         this.teamMotd = (String) data.getOrDefault("teamMotd", ""); // Default to empty if not found
 
         this.memberRoles = new HashMap<>();
-        Map<String, String> rolesData = (Map<String, String>) data.get("memberRoles");
+        Object rolesObj = data.get("memberRoles");
+        Map<String, String> rolesData = null;
+        if (rolesObj instanceof MemorySection) {
+            rolesData = new HashMap<>();
+            MemorySection section = (MemorySection) rolesObj;
+            for (String key : section.getKeys(false)) {
+                rolesData.put(key, section.getString(key));
+            }
+        } else if (rolesObj instanceof Map) {
+            rolesData = (Map<String, String>) rolesObj;
+        }
         if (rolesData != null) {
             for (Map.Entry<String, String> entry : rolesData.entrySet()) {
                 try {

@@ -6,6 +6,8 @@ import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class SetMotdHandler implements SubCommandExecutor {
 
@@ -33,5 +35,14 @@ public class SetMotdHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Sets the team's Message of the Day (OWNER/MANAGER only).";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // Suggest <motd> as a placeholder for the required argument
+        if (args.length == 1) {
+            return Collections.singletonList("<motd>");
+        }
+        return Collections.emptyList();
     }
 }

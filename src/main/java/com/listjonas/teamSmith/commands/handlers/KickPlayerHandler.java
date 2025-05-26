@@ -6,6 +6,10 @@ import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class KickPlayerHandler implements SubCommandExecutor {
 
     @Override
@@ -36,5 +40,16 @@ public class KickPlayerHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Kicks a player from your team (OWNER/MANAGER only).";
+    }
+
+    @Override
+    public List<String> getTabCompletions(String[] args) {
+        // Suggest online player names for the first argument
+        if (args.length == 1) {
+            return Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
