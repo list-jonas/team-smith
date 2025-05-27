@@ -32,7 +32,7 @@ public class TeamSmith extends JavaPlugin {
             java.lang.reflect.Constructor<org.bukkit.command.PluginCommand> constructor = 
                 org.bukkit.command.PluginCommand.class.getDeclaredConstructor(String.class, org.bukkit.plugin.Plugin.class);
             constructor.setAccessible(true);
-            org.bukkit.command.PluginCommand command = constructor.newInstance("team", this);
+            org.bukkit.command.PluginCommand command = constructor.newInstance("teamsmith", this);
 
             // Set command properties
             command.setExecutor(teamExecutor);
