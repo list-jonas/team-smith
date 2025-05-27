@@ -31,6 +31,7 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("delete",new DeleteTeamHandler());
         handlers.put("disband",handlers.get("delete"));
         handlers.put("invite",new InvitePlayerHandler());
+        handlers.put("join", new JoinTeamHandler());
         handlers.put("kick",new KickPlayerHandler());
         handlers.put("leave",new LeaveTeamHandler());
         handlers.put("transfer",new TransferOwnershipHandler());
