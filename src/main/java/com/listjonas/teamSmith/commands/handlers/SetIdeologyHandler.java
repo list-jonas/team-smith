@@ -48,11 +48,6 @@ public class SetIdeologyHandler extends SubCommandExecutor {
     }
 
     @Override
-    public String getArgumentUsage() {
-        return "";
-    }
-
-    @Override
     public String getDescription() {
         return "Sets the team's ideology (MANAGER/OWNER only).";
     }

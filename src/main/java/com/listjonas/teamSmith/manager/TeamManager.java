@@ -197,6 +197,7 @@ public class TeamManager {
             return false;
         }
         if (team.addMember(playerToAdd)) {
+            team.broadcastMessage(INFO_COLOR + playerToAdd.getName() + ACCENT_COLOR + " has joined the team.");
             playerTeamMap.put(playerToAdd.getUniqueId(), teamName.toLowerCase());
             saveTeams(); // Save after adding member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToAdd.getName() + " has been added to team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
@@ -249,6 +250,7 @@ public class TeamManager {
             // Allow self-leave
             team.removeMember(playerToRemove);
             playerTeamMap.remove(playerToRemove.getUniqueId());
+            team.broadcastMessage(INFO_COLOR + playerToRemove.getName() + ACCENT_COLOR + " has left or been kicked from the team.");
             saveTeams(); // Save after removing member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             return true;
@@ -259,6 +261,7 @@ public class TeamManager {
 
         if (team.removeMember(playerToRemove)) {
             playerTeamMap.remove(playerToRemove.getUniqueId());
+            team.broadcastMessage(INFO_COLOR + playerToRemove.getName() + ACCENT_COLOR + " has left or been kicked from the team.");
             saveTeams(); // Save after removing member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToRemove.getName() + " has been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             playerToRemove.sendMessage(MSG_PREFIX + INFO_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + INFO_COLOR + ".");

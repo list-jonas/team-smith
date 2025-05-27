@@ -41,7 +41,7 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("setprefixcolor",new SetPrefixColorHandler());
         handlers.put("info",new TeamInfoHandler());
         handlers.put("setrole",new SetRoleHandler());
-        handlers.put("motd",new SetMotdHandler());
+        handlers.put("setmotd",new SetMotdHandler());
         handlers.put("friendlyfire",new FriendlyFireHandler());
         handlers.put("sethome", new SetHomeHandler());
         handlers.put("delhome", new DeleteHomeHandler());
