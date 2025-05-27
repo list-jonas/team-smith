@@ -26,6 +26,7 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
 
     public TeamCommand(TeamSmith plugin,TeamManager teamManager){
         this.plugin=plugin;this.teamManager=teamManager;handlers=new HashMap<>();
+        handlers.put("list", new TeamListHandler());
         handlers.put("create",new CreateTeamHandler());
         handlers.put("delete",new DeleteTeamHandler());
         handlers.put("disband",handlers.get("delete"));

@@ -6,6 +6,7 @@ import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -353,5 +354,9 @@ public class TeamManager {
         }
         dataManager.saveData(TEAMS_CONFIG_PATH, teamsToSave);
         plugin.getLogger().info("Saved " + teamsToSave.size() + " teams to " + TEAMS_DATA_FILE);
+    }
+
+    public Collection<Team> getAllTeams() {
+        return teams.values();
     }
 }
