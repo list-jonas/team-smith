@@ -20,8 +20,9 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        Team playerTeam = teamManager.getPlayerTeam(player);
+        teamManager.updatePlayerTabName(player);
 
+        Team playerTeam = teamManager.getPlayerTeam(player);
         if (playerTeam != null) {
             String motd = playerTeam.getTeamMotd();
             if (motd != null && !motd.isEmpty()) {

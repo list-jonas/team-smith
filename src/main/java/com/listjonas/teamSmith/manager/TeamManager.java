@@ -49,6 +49,25 @@ public class TeamManager {
         return instance;
     }
 
+    public void updatePlayerTabName(Player player) {
+        Team team = getPlayerTeam(player);
+        if (team != null && team.getPrefix() != null && team.getPrefixColor() != null) {
+            String prefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
+            // Ensure the prefix + name doesn't exceed Minecraft's limits (typically 16 chars for player list names, but can vary)
+            // Bukkit handles truncation if setPlayerListName is too long, but good to be mindful.
+            String newListName = prefix + player.getName();
+            player.setPlayerListName(newListName);
+        } else {
+            player.setPlayerListName(player.getName()); // Reset if not in a team or prefix/color is null
+        }
+    }
+
+    public void updateAllPlayersTabNames() {
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            updatePlayerTabName(onlinePlayer);
+        }
+    }
+
     public boolean createTeam(String teamName, Player leader) {
         if (teams.containsKey(teamName.toLowerCase())) {
             leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name " + ACCENT_COLOR + teamName + ERROR_COLOR + " already exists.");
@@ -63,6 +82,7 @@ public class TeamManager {
         playerTeamMap.put(leader.getUniqueId(), teamName.toLowerCase());
         saveTeams(); // Save after creating
         leader.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " created successfully!");
+        updatePlayerTabName(leader);
         return true;
     }
 
@@ -113,6 +133,7 @@ public class TeamManager {
         saveTeams();
         // Notify team members about the name change (optional, but good UX)
         teamToRename.broadcastMessage(MSG_PREFIX + INFO_COLOR + "Your team has been renamed to '" + ACCENT_COLOR + newTeamName + INFO_COLOR + "' by " + ACCENT_COLOR + requester.getName() + INFO_COLOR + ".");
+        updateAllPlayersTabNames();
         return true;
     }
 
@@ -133,6 +154,7 @@ public class TeamManager {
         dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, teamName.toLowerCase()); // Remove from data file
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " has been disbanded.");
         // Notify members if needed (e.g., loop through team.getMembers() before clearing)
+        updateAllPlayersTabNames();
         return true;
     }
 
@@ -165,6 +187,7 @@ public class TeamManager {
             saveTeams(); // Save after adding member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToAdd.getName() + " has been added to team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             playerToAdd.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You have joined team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
+            updatePlayerTabName(playerToAdd);
             return true;
         }
         return false;
@@ -225,6 +248,7 @@ public class TeamManager {
             saveTeams(); // Save after removing member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToRemove.getName() + " has been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             playerToRemove.sendMessage(MSG_PREFIX + INFO_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + INFO_COLOR + ".");
+            updatePlayerTabName(playerToRemove);
             return true;
         }
         return false;
@@ -270,6 +294,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + prefix);
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix set to: " + displayPrefix + ChatColor.RESET);
+        updateAllPlayersTabNames();
         return true;
     }
 
@@ -294,6 +319,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix color
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix color updated. Preview: " + displayPrefix + ChatColor.RESET);
+        updateAllPlayersTabNames();
         return true;
     }
 
