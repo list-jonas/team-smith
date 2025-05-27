@@ -1,6 +1,7 @@
 package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import org.bukkit.command.CommandSender;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TpWarpHandler implements SubCommandExecutor {
+public class TpWarpHandler extends SubCommandExecutor {
     // Cooldown map: player UUID -> last warp time (ms)
     private static final Map<java.util.UUID, Long> cooldowns = new HashMap<>();
     private static final long COOLDOWN_MILLIS = 3 * 60 * 1000; // 3 minutes
@@ -46,10 +47,13 @@ public class TpWarpHandler implements SubCommandExecutor {
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Teleported to warp '" + warpName + "'.");
         return true;
     }
+
     @Override
     public String getArgumentUsage() { return "<name>"; }
+
     @Override
     public String getDescription() { return "Teleport to a named team warp (3 min cooldown)."; }
+
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) {
@@ -64,5 +68,10 @@ public class TpWarpHandler implements SubCommandExecutor {
             return java.util.Collections.emptyList();
         }
         return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MEMBER;
     }
 }

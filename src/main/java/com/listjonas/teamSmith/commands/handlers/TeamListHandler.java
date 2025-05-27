@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -11,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class TeamListHandler implements SubCommandExecutor {
+public class TeamListHandler extends SubCommandExecutor {
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         Collection<Team> teams = teamManager.getAllTeams();
@@ -41,12 +42,7 @@ public class TeamListHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String getArgumentUsage() {
-        return "";
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.PUBLIC;
     }
 }

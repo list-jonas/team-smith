@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.TeamSmith;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,7 +13,8 @@ import java.util.stream.Collectors;
 
 import static com.listjonas.teamSmith.commands.TeamCommand.*;
 
-public class SetIdeologyHandler implements SubCommandExecutor {
+public class SetIdeologyHandler extends SubCommandExecutor {
+
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         Team team = teamManager.getPlayerTeam(player);
@@ -53,6 +55,11 @@ public class SetIdeologyHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Sets the team's ideology (MANAGER/OWNER only).";
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MANAGER;
     }
 
     @Override

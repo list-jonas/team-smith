@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -12,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SetRoleHandler implements SubCommandExecutor {
+public class SetRoleHandler extends SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -57,15 +58,20 @@ public class SetRoleHandler implements SubCommandExecutor {
     }
 
     @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.OWNER;
+    }
+
+    @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            // Suggest roles for the first argument
-            return Arrays.asList("manager", "member");
-        } else if (args.length == 2) {
-            // Suggest online player names for the second argument
+            // Suggest online player names for the first argument
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
                     .collect(Collectors.toList());
+        } else if (args.length == 2) {
+            // Suggest roles for the second argument
+            return Arrays.asList("MANAGER", "MEMBER");
         }
         return Collections.emptyList();
     }

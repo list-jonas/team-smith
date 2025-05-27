@@ -1,6 +1,7 @@
 package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import org.bukkit.command.CommandSender;
@@ -8,7 +9,8 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-public class DeleteWarpHandler implements SubCommandExecutor {
+public class DeleteWarpHandler extends SubCommandExecutor {
+
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length < 1) {
@@ -36,8 +38,15 @@ public class DeleteWarpHandler implements SubCommandExecutor {
     }
     @Override
     public String getArgumentUsage() { return "<name>"; }
+
     @Override
     public String getDescription() { return "Deletes a named team warp (OWNER/MANAGER)."; }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MANAGER;
+    }
+
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) return Collections.singletonList("<name>");

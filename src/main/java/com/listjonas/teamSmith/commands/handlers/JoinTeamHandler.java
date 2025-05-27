@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -9,7 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JoinTeamHandler implements SubCommandExecutor {
+public class JoinTeamHandler extends SubCommandExecutor {
+
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length != 1) {
@@ -51,7 +53,14 @@ public class JoinTeamHandler implements SubCommandExecutor {
         return true;
     }
     @Override public String getArgumentUsage() { return "<teamName>"; }
+
     @Override public String getDescription() { return "Accept a team invitation."; }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.PUBLIC;
+    }
+
     @Override public List<String> getTabCompletions(CommandSender s, String[] a) {
         if (a.length == 1 && s instanceof Player) {
             return TeamManager.getInstance().getPendingInvites(((Player)s).getUniqueId())

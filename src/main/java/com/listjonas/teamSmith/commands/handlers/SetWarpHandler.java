@@ -1,6 +1,7 @@
 package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import org.bukkit.command.CommandSender;
@@ -9,7 +10,7 @@ import org.bukkit.Location;
 import java.util.Collections;
 import java.util.List;
 
-public class SetWarpHandler implements SubCommandExecutor {
+public class SetWarpHandler extends SubCommandExecutor {
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length < 1) {
@@ -47,6 +48,11 @@ public class SetWarpHandler implements SubCommandExecutor {
     
     @Override
     public String getDescription() { return "Sets a named team warp (OWNER/MANAGER, max 3)."; }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MANAGER;
+    }
     
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {

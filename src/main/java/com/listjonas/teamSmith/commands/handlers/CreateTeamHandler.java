@@ -2,13 +2,14 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
 
-public class CreateTeamHandler implements SubCommandExecutor {
+public class CreateTeamHandler extends SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -28,6 +29,11 @@ public class CreateTeamHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Creates a new team.";
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.PUBLIC;
     }
 
     @Override

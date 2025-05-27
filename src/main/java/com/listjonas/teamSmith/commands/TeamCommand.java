@@ -3,6 +3,7 @@ package com.listjonas.teamSmith.commands;
 import com.listjonas.teamSmith.TeamSmith;
 import com.listjonas.teamSmith.commands.handlers.*;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.Team;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -52,39 +53,88 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
-        if(!(sender instanceof Player)){sender.sendMessage(MSG_PREFIX+ERROR_COLOR+"Only players can use this command.");return true;}
+        if(!(sender instanceof Player)) {sender.sendMessage(MSG_PREFIX+ERROR_COLOR+"Only players can use this command."); return true;}
         Player player=(Player)sender;
-        if(args.length==0){sendHelpMessage(player);return true;}
+        if(args.length==0) {sendHelpMessage(player); return true;}
         String sub=args[0].toLowerCase();
-        SubCommandExecutor h=handlers.get(sub);
-        if(h!=null) return h.execute(player,Arrays.copyOfRange(args,1,args.length),teamManager);
+        SubCommandExecutor handler=handlers.get(sub);
+        if(handler!=null){
+            Team playerTeam = teamManager.getPlayerTeam(player);
+            int playerPermissionLevel = -1; // Default for no team or no role
+            if (playerTeam != null) {
+                Team.Role playerRole = playerTeam.getPlayerRole(player.getUniqueId());
+                if (playerRole != null) {
+                    playerPermissionLevel = playerRole.getPermissionLevel();
+                }
+            }
+            if (playerPermissionLevel >= handler.getRequiredPermissionLevel().getLevel()) {
+                return handler.execute(player,Arrays.copyOfRange(args,1,args.length),teamManager);
+            } else {
+                player.sendMessage(MSG_PREFIX + ERROR_COLOR + "You don't have permission to use this command.");
+                return true;
+            }
+        }
         sendHelpMessage(player);return true;
     }
 
     private void sendHelpMessage(Player p){
         p.sendMessage(MSG_PREFIX+ACCENT_COLOR+"--- TeamSmith Help ---");
-        handlers.forEach((k,h)->p.sendMessage(INFO_COLOR+"/team "+k+(h.getArgumentUsage().isEmpty()?"":" "+h.getArgumentUsage())+ChatColor.GRAY+" - "+h.getDescription()));
+        Team playerTeam = teamManager.getPlayerTeam(p);
+        int playerPermissionLevel; // Default for no team or no role
+        if (playerTeam != null) {
+            Team.Role playerRole = playerTeam.getPlayerRole(p.getUniqueId());
+            if (playerRole != null) {
+                playerPermissionLevel = playerRole.getPermissionLevel();
+            } else {
+                playerPermissionLevel = -1;
+            }
+        } else {
+            playerPermissionLevel = -1;
+        }
+
+        handlers.forEach((k,h)->{
+            if (playerPermissionLevel >= h.getRequiredPermissionLevel().getLevel()) {
+                p.sendMessage(INFO_COLOR+"/team "+k+(h.getArgumentUsage().isEmpty()?"":" "+h.getArgumentUsage())+ChatColor.GRAY+" - "+h.getDescription());
+            }
+        });
         p.sendMessage(MSG_PREFIX+ACCENT_COLOR+"--------------------");
     }
 
-    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!(sender instanceof Player)) {
+            return Collections.emptyList();
+        }
+        Player player = (Player) sender;
+        Team playerTeam = teamManager.getPlayerTeam(player);
+        int playerPermissionLevel = -1; // Default for no team or no role
+        if (playerTeam != null) {
+            Team.Role playerRole = playerTeam.getPlayerRole(player.getUniqueId());
+            if (playerRole != null) {
+                playerPermissionLevel = playerRole.getPermissionLevel();
+            }
+        }
+
         if (args.length == 1) {
             // top-level subcommands
-            return handlers.keySet().stream()
+            final int finalPlayerPermissionLevel = playerPermissionLevel;
+            return handlers.entrySet().stream()
+                .filter(entry -> finalPlayerPermissionLevel >= entry.getValue().getRequiredPermissionLevel().getLevel())
+                .map(Map.Entry::getKey)
                 .filter(cmd -> cmd.startsWith(args[0].toLowerCase()))
                 .collect(Collectors.toList());
         }
 
         SubCommandExecutor handler = handlers.get(args[0].toLowerCase());
-        if (handler == null) return Collections.emptyList();
+        if (handler == null || playerPermissionLevel < handler.getRequiredPermissionLevel().getLevel()) {
+            return Collections.emptyList(); // Don't suggest args if no permission for command
+        }
 
         // Pass only the “real” args to the handler
         String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
         List<String> suggestions = handler.getTabCompletions(sender, subArgs);
 
         // Filter suggestions against the *current* token
-        String current = subArgs[subArgs.length - 1].toLowerCase();
+        String current = subArgs.length > 0 ? subArgs[subArgs.length - 1].toLowerCase() : "";
         return suggestions.stream()
             .filter(s -> s.toLowerCase().startsWith(current))
             .collect(Collectors.toList());

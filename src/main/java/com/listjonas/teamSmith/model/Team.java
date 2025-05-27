@@ -22,9 +22,19 @@ public class Team {
 
 
     public enum Role {
-        OWNER,
-        MANAGER,
-        MEMBER
+        OWNER(2),
+        MANAGER(1),
+        MEMBER(0);
+
+        private final int permissionLevel;
+
+        Role(int level) {
+            this.permissionLevel = level;
+        }
+
+        public int getPermissionLevel() {
+            return permissionLevel;
+        }
     }
 
     private Location homeLocation;

@@ -1,6 +1,7 @@
 package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import org.bukkit.command.CommandSender;
@@ -9,7 +10,7 @@ import org.bukkit.Location;
 import java.util.Collections;
 import java.util.List;
 
-public class TpHomeHandler implements SubCommandExecutor {
+public class TpHomeHandler extends SubCommandExecutor {
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         Team team = teamManager.getPlayerTeam(player);
@@ -26,10 +27,12 @@ public class TpHomeHandler implements SubCommandExecutor {
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Teleported to team home.");
         return true;
     }
-    @Override
-    public String getArgumentUsage() { return ""; }
+
     @Override
     public String getDescription() { return "Teleport to the team home location."; }
+
     @Override
-    public java.util.List<String> getTabCompletions(CommandSender sender, String[] args) { return Collections.emptyList(); }
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MEMBER;
+    }
 }

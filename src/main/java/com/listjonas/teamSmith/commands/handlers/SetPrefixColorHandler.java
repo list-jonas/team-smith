@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 
@@ -9,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class SetPrefixColorHandler implements SubCommandExecutor {
+public class SetPrefixColorHandler extends SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -36,6 +37,11 @@ public class SetPrefixColorHandler implements SubCommandExecutor {
     @Override
     public String getDescription() {
         return "Sets your team's prefix color (OWNER/MANAGER only).";
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MANAGER;
     }
 
     @Override
