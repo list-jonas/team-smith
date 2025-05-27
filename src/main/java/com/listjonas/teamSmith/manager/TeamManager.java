@@ -66,6 +66,56 @@ public class TeamManager {
         return true;
     }
 
+    public boolean renameTeam(Team teamToRename, String newTeamName, Player requester) {
+        if (teamToRename == null) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "An internal error occurred (team not found for rename).");
+            return false;
+        }
+        if (!teamToRename.getOwner().equals(requester.getUniqueId())) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team owner can rename the team.");
+            return false;
+        }
+        String oldTeamNameKey = teamToRename.getName().toLowerCase(); // This is the name before .setName() is called
+        String newTeamNameKey = newTeamName.toLowerCase();
+
+        if (teams.containsKey(newTeamNameKey)) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name '" + ACCENT_COLOR + newTeamName + ERROR_COLOR + "' already exists.");
+            return false;
+        }
+
+        // Explicitly delete the old team entry from the data file BEFORE updating in-memory maps and saving.
+        dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, oldTeamNameKey);
+
+        // Update the team's name object
+        teamToRename.setName(newTeamName);
+
+        // Update the main teams map (in-memory)
+        teams.remove(oldTeamNameKey); // remove by old key
+        teams.put(newTeamNameKey, teamToRename); // add with new key
+
+        // Update the playerTeamMap for all members
+        for (UUID memberId : teamToRename.getMembers()) {
+            playerTeamMap.put(memberId, newTeamNameKey);
+        }
+        
+        // Update pending invites if any team was inviting to this team by its old name
+        List<UUID> playersToUpdateInvites = new ArrayList<>();
+        pendingInvites.forEach((playerId, invitedTeamName) -> {
+            if (invitedTeamName.equalsIgnoreCase(oldTeamNameKey)) {
+                playersToUpdateInvites.add(playerId);
+            }
+        });
+        for (UUID playerId : playersToUpdateInvites) {
+            pendingInvites.remove(playerId, oldTeamNameKey);
+            pendingInvites.put(playerId, newTeamNameKey);
+        }
+
+        saveTeams();
+        // Notify team members about the name change (optional, but good UX)
+        teamToRename.broadcastMessage(MSG_PREFIX + INFO_COLOR + "Your team has been renamed to '" + ACCENT_COLOR + newTeamName + INFO_COLOR + "' by " + ACCENT_COLOR + requester.getName() + INFO_COLOR + ".");
+        return true;
+    }
+
     public boolean deleteTeam(String teamName, Player requester) {
         Team team = getTeam(teamName);
         if (team == null) {

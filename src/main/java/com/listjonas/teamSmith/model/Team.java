@@ -136,9 +136,24 @@ public class Team {
         return data;
     }
 
+    public void broadcastMessage(String s) {
+        for (UUID memberId : memberRoles.keySet()) {
+            Player player = org.bukkit.Bukkit.getPlayer(memberId);
+            if (player != null && player.isOnline()) {
+                player.sendMessage(prefixColor + prefix + s);
+            }
+        }
+    }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String newTeamName) {
+        if (newTeamName == null || newTeamName.isEmpty()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
+        this.name = newTeamName;
     }
 
     public UUID getOwner() {

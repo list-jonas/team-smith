@@ -105,7 +105,7 @@ public class InvitePlayerHandler implements SubCommandExecutor {
         if (args.length == 1) {
             String currentPlayerName = "";
             if (sender instanceof Player) {
-                currentPlayerName = ((Player) sender).getName();
+                currentPlayerName = sender.getName();
             }
             final String finalCurrentPlayerName = currentPlayerName; // effectively final for lambda
             return Bukkit.getOnlinePlayers().stream()
