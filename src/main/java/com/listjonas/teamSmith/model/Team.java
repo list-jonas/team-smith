@@ -72,10 +72,15 @@ public class Team {
 
         // === deserialize homeLocation if present ===
         Object homeObj = data.get("homeLocation");
-        if (homeObj instanceof Map) {
-            // safe cast because we serialized it as Map<String,Object>
+        if (homeObj instanceof MemorySection) {
+            MemorySection homeSection = (MemorySection) homeObj;
             this.homeLocation = LocationUtil.deserializeLocation(
-                    (Map<String,Object>) homeObj
+                    homeSection.getValues(false)
+            );
+        } else if (homeObj instanceof Map) {
+            // in case DataManager flattened it to a raw Map
+            this.homeLocation = LocationUtil.deserializeLocation(
+                    (Map<String, Object>) homeObj
             );
         }
 
