@@ -75,11 +75,6 @@ public class TeamInfoHandler extends SubCommandExecutor {
     }
 
     @Override
-    public String getArgumentUsage() {
-        return ""; // No arguments needed
-    }
-
-    @Override
     public String getDescription() {
         return "Shows information about your current team.";
     }
