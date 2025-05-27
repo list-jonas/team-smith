@@ -49,6 +49,47 @@ public class TeamManager {
         return instance;
     }
 
+    public void updatePlayerTabName(Player player) {
+        Team team = getPlayerTeam(player);
+        if (team != null && team.getPrefix() != null && team.getPrefixColor() != null) {
+            String prefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
+            String newListName = prefix + player.getName();
+            player.setPlayerListName(newListName);
+        } else {
+            player.setPlayerListName(player.getName()); // Reset if not in a team or prefix/color is null
+        }
+    }
+
+    public void updateAllPlayersTabNamesAndFooter() {
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            updatePlayerTabName(onlinePlayer);
+        }
+        updateTabListFooterForAllPlayers();
+        updateTabListHeaderForAllPlayers();
+    }
+
+    public void updateTabListFooterForAllPlayers() {
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory() / 1024 / 1024; // MB
+        long allocatedMemory = runtime.totalMemory() / 1024 / 1024; // MB
+        long freeMemory = runtime.freeMemory() / 1024 / 1024; // MB
+        long usedMemory = allocatedMemory - freeMemory;
+
+        String footerText = String.format("%sRAM: %dMB / %dMB",
+                                      ChatColor.GRAY, usedMemory, maxMemory) + "\n" + "------------------------------------------";;
+
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            onlinePlayer.setPlayerListFooter(footerText);
+        }
+    }
+
+    public void updateTabListHeaderForAllPlayers() {
+        String headerText = ChatColor.GRAY + "------------------------------------------";
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            onlinePlayer.setPlayerListHeader(headerText);
+        }
+    }
+
     public boolean createTeam(String teamName, Player leader) {
         if (teams.containsKey(teamName.toLowerCase())) {
             leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name " + ACCENT_COLOR + teamName + ERROR_COLOR + " already exists.");
@@ -63,6 +104,58 @@ public class TeamManager {
         playerTeamMap.put(leader.getUniqueId(), teamName.toLowerCase());
         saveTeams(); // Save after creating
         leader.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " created successfully!");
+        updatePlayerTabName(leader);
+        return true;
+    }
+
+    public boolean renameTeam(Team teamToRename, String newTeamName, Player requester) {
+        if (teamToRename == null) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "An internal error occurred (team not found for rename).");
+            return false;
+        }
+        if (!teamToRename.getOwner().equals(requester.getUniqueId())) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "Only the team owner can rename the team.");
+            return false;
+        }
+        String oldTeamNameKey = teamToRename.getName().toLowerCase(); // This is the name before .setName() is called
+        String newTeamNameKey = newTeamName.toLowerCase();
+
+        if (teams.containsKey(newTeamNameKey)) {
+            requester.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name '" + ACCENT_COLOR + newTeamName + ERROR_COLOR + "' already exists.");
+            return false;
+        }
+
+        // Explicitly delete the old team entry from the data file BEFORE updating in-memory maps and saving.
+        dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, oldTeamNameKey);
+
+        // Update the team's name object
+        teamToRename.setName(newTeamName);
+
+        // Update the main teams map (in-memory)
+        teams.remove(oldTeamNameKey); // remove by old key
+        teams.put(newTeamNameKey, teamToRename); // add with new key
+
+        // Update the playerTeamMap for all members
+        for (UUID memberId : teamToRename.getMembers()) {
+            playerTeamMap.put(memberId, newTeamNameKey);
+        }
+        
+        // Update pending invites if any team was inviting to this team by its old name
+        List<UUID> playersToUpdateInvites = new ArrayList<>();
+        pendingInvites.forEach((playerId, invitedTeamName) -> {
+            if (invitedTeamName.equalsIgnoreCase(oldTeamNameKey)) {
+                playersToUpdateInvites.add(playerId);
+            }
+        });
+        for (UUID playerId : playersToUpdateInvites) {
+            pendingInvites.remove(playerId, oldTeamNameKey);
+            pendingInvites.put(playerId, newTeamNameKey);
+        }
+
+        saveTeams();
+        // Notify team members about the name change (optional, but good UX)
+        teamToRename.broadcastMessage(MSG_PREFIX + INFO_COLOR + "Your team has been renamed to '" + ACCENT_COLOR + newTeamName + INFO_COLOR + "' by " + ACCENT_COLOR + requester.getName() + INFO_COLOR + ".");
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -83,6 +176,7 @@ public class TeamManager {
         dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, teamName.toLowerCase()); // Remove from data file
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " has been disbanded.");
         // Notify members if needed (e.g., loop through team.getMembers() before clearing)
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -111,10 +205,12 @@ public class TeamManager {
             return false;
         }
         if (team.addMember(playerToAdd)) {
+            team.broadcastMessage(INFO_COLOR + playerToAdd.getName() + ACCENT_COLOR + " has joined the team.");
             playerTeamMap.put(playerToAdd.getUniqueId(), teamName.toLowerCase());
             saveTeams(); // Save after adding member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToAdd.getName() + " has been added to team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             playerToAdd.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You have joined team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
+            updatePlayerTabName(playerToAdd);
             return true;
         }
         return false;
@@ -162,6 +258,7 @@ public class TeamManager {
             // Allow self-leave
             team.removeMember(playerToRemove);
             playerTeamMap.remove(playerToRemove.getUniqueId());
+            team.broadcastMessage(INFO_COLOR + playerToRemove.getName() + ACCENT_COLOR + " has left or been kicked from the team.");
             saveTeams(); // Save after removing member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             return true;
@@ -172,9 +269,11 @@ public class TeamManager {
 
         if (team.removeMember(playerToRemove)) {
             playerTeamMap.remove(playerToRemove.getUniqueId());
+            team.broadcastMessage(INFO_COLOR + playerToRemove.getName() + ACCENT_COLOR + " has left or been kicked from the team.");
             saveTeams(); // Save after removing member
             requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + playerToRemove.getName() + " has been removed from team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + ".");
             playerToRemove.sendMessage(MSG_PREFIX + INFO_COLOR + "You have been removed from team " + ACCENT_COLOR + teamName + INFO_COLOR + ".");
+            updatePlayerTabName(playerToRemove);
             return true;
         }
         return false;
@@ -220,6 +319,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + prefix);
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix set to: " + displayPrefix + ChatColor.RESET);
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -244,6 +344,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix color
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix color updated. Preview: " + displayPrefix + ChatColor.RESET);
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -379,5 +480,13 @@ public class TeamManager {
 
     public Collection<Team> getAllTeams() {
         return teams.values();
+    }
+
+    public boolean hasPermission(@NotNull UUID uniqueId, Team team, Team.Role role) {
+        if (uniqueId == null || team == null || role == null) {
+            throw new IllegalArgumentException("UUID, Team, and Role cannot be null");
+        }
+        Team.Role playerRole = team.getPlayerRole(uniqueId);
+        return playerRole != null && (playerRole == Team.Role.OWNER || playerRole == role);
     }
 }

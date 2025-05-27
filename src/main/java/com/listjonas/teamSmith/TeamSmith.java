@@ -4,17 +4,20 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.listeners.EntityDamageListener;
 import com.listjonas.teamSmith.listeners.PlayerChatListener;
 import com.listjonas.teamSmith.listeners.PlayerJoinListener;
+import com.listjonas.teamSmith.listeners.PlayerQuitListener;
+import com.listjonas.teamSmith.data.ConfigData;
 import com.listjonas.teamSmith.manager.TeamManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class TeamSmith extends JavaPlugin {
-
-    private static TeamSmith instance;
     private TeamManager teamManager;
+    private ConfigData configData;
+    private static TeamSmith instance;
 
     @Override
     public void onEnable() {
         instance = this;
+        configData = new ConfigData(this);
         teamManager = TeamManager.createInstance(this);
 
         // Register commands programmatically for Paper compatibility
@@ -49,7 +52,15 @@ public class TeamSmith extends JavaPlugin {
         // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerChatListener(teamManager), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(teamManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(teamManager), this);
         getServer().getPluginManager().registerEvents(new EntityDamageListener(teamManager), this);
+
+        // Schedule a repeating task to update the tab list footer
+        this.getServer().getScheduler().runTaskTimer(this, () -> {
+            if (teamManager != null) {
+                teamManager.updateTabListFooterForAllPlayers();
+            }
+        }, 0L, configData.getRamUpdateFrequencyTicks());
 
         getLogger().info("TeamSmith plugin has been enabled!");
     }
@@ -68,5 +79,9 @@ public class TeamSmith extends JavaPlugin {
 
     public TeamManager getTeamManager() {
         return teamManager;
+    }
+
+    public ConfigData getConfigData() {
+        return configData;
     }
 }

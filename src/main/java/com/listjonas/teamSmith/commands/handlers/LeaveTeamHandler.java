@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -9,7 +10,7 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-public class LeaveTeamHandler implements SubCommandExecutor {
+public class LeaveTeamHandler extends SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -33,8 +34,7 @@ public class LeaveTeamHandler implements SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(CommandSender sender, String[] args) {
-        // No tab completions for leave
-        return Collections.emptyList();
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.MEMBER;
     }
 }

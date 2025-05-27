@@ -2,6 +2,7 @@ package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -11,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TransferOwnershipHandler implements SubCommandExecutor {
+public class TransferOwnershipHandler extends SubCommandExecutor {
 
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
@@ -52,5 +53,10 @@ public class TransferOwnershipHandler implements SubCommandExecutor {
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public PermissionLevel getRequiredPermissionLevel() {
+        return PermissionLevel.OWNER;
     }
 }
