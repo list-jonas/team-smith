@@ -6,10 +6,11 @@ import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TeamInfoHandler extends SubCommandExecutor {
 
@@ -53,6 +54,23 @@ public class TeamInfoHandler extends SubCommandExecutor {
             String roleString = TeamCommand.ACCENT_COLOR + "(" + role.name() + ")";
             player.sendMessage(ChatColor.GRAY + "- " + TeamCommand.ACCENT_COLOR + (member != null ? member.getName() : "Offline UUID: " + memberId.toString().substring(0,8)) + " " + roleString);
         }
+
+        String motd = team.getTeamMotd();
+        if (motd != null && !motd.isEmpty()) {
+            player.sendMessage(TeamCommand.INFO_COLOR + "MOTD: " + ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', motd));
+        }
+
+        // Server Memory Usage
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory() / 1024 / 1024; // MB
+        long allocatedMemory = runtime.totalMemory() / 1024 / 1024; // MB
+        long freeMemory = runtime.freeMemory() / 1024 / 1024; // MB
+        long usedMemory = allocatedMemory - freeMemory;
+
+        player.sendMessage(TeamCommand.MSG_PREFIX + ChatColor.GOLD + "--- Server Vitals ---");
+        player.sendMessage(TeamCommand.INFO_COLOR + "Used Memory: " + TeamCommand.ACCENT_COLOR + usedMemory + "MB / " + allocatedMemory + TeamCommand.INFO_COLOR + "MB allocated");
+        player.sendMessage(TeamCommand.INFO_COLOR + "Max Memory: " + TeamCommand.ACCENT_COLOR + maxMemory + "MB");
+
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ACCENT_COLOR + "--------------------");
     }
 
@@ -72,7 +90,7 @@ public class TeamInfoHandler extends SubCommandExecutor {
     }
 
     @Override
-    public List<String> getTabCompletions(CommandSender sender, String[] args) {
+    public List<String> getTabCompletions(org.bukkit.command.CommandSender sender, String[] args) {
         // No tab completions for info
         return java.util.Collections.emptyList();
     }

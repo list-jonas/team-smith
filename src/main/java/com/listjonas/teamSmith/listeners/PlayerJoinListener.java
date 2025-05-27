@@ -32,5 +32,7 @@ public class PlayerJoinListener implements Listener {
                 }, 20L); // 20 ticks = 1 second
             }
         }
+        // Update the tab list names and footer for all players after handling join specifics
+        teamManager.updateAllPlayersTabNamesAndFooter();
     }
 }

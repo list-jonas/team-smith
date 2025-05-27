@@ -53,8 +53,6 @@ public class TeamManager {
         Team team = getPlayerTeam(player);
         if (team != null && team.getPrefix() != null && team.getPrefixColor() != null) {
             String prefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
-            // Ensure the prefix + name doesn't exceed Minecraft's limits (typically 16 chars for player list names, but can vary)
-            // Bukkit handles truncation if setPlayerListName is too long, but good to be mindful.
             String newListName = prefix + player.getName();
             player.setPlayerListName(newListName);
         } else {
@@ -62,9 +60,25 @@ public class TeamManager {
         }
     }
 
-    public void updateAllPlayersTabNames() {
+    public void updateAllPlayersTabNamesAndFooter() {
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             updatePlayerTabName(onlinePlayer);
+        }
+        updateTabListFooterForAllPlayers(); // Update footer after all names are set
+    }
+
+    public void updateTabListFooterForAllPlayers() {
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory() / 1024 / 1024; // MB
+        long allocatedMemory = runtime.totalMemory() / 1024 / 1024; // MB
+        long freeMemory = runtime.freeMemory() / 1024 / 1024; // MB
+        long usedMemory = allocatedMemory - freeMemory;
+
+        String footerText = String.format("%sRAM: %dMB / %dMB",
+                                      ChatColor.GRAY, usedMemory, maxMemory);
+
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            onlinePlayer.setPlayerListFooter(footerText);
         }
     }
 
@@ -133,7 +147,7 @@ public class TeamManager {
         saveTeams();
         // Notify team members about the name change (optional, but good UX)
         teamToRename.broadcastMessage(MSG_PREFIX + INFO_COLOR + "Your team has been renamed to '" + ACCENT_COLOR + newTeamName + INFO_COLOR + "' by " + ACCENT_COLOR + requester.getName() + INFO_COLOR + ".");
-        updateAllPlayersTabNames();
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -154,7 +168,7 @@ public class TeamManager {
         dataManager.deleteDataEntry(TEAMS_CONFIG_PATH, teamName.toLowerCase()); // Remove from data file
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " has been disbanded.");
         // Notify members if needed (e.g., loop through team.getMembers() before clearing)
-        updateAllPlayersTabNames();
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -294,7 +308,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + prefix);
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix set to: " + displayPrefix + ChatColor.RESET);
-        updateAllPlayersTabNames();
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
@@ -319,7 +333,7 @@ public class TeamManager {
         saveTeams(); // Save after setting prefix color
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
         requester.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " prefix color updated. Preview: " + displayPrefix + ChatColor.RESET);
-        updateAllPlayersTabNames();
+        updateAllPlayersTabNamesAndFooter();
         return true;
     }
 
