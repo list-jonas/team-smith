@@ -28,17 +28,38 @@ public class InvitePlayerHandler implements SubCommandExecutor {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Player '" + TeamCommand.ACCENT_COLOR + args[0] + TeamCommand.ERROR_COLOR + "' not found.");
             return true;
         }
+
+        // Edge case: Player trying to invite themselves
+        if (targetInvite.equals(player)) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You cannot invite yourself to your team.");
+            return true;
+        }
+
         Team teamToInvite = teamManager.getPlayerTeam(player);
         if (teamToInvite == null) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You are not in a team to invite players to.");
             return true;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
-        String teamName = teamManager.getPlayerTeam(player).getName();
+        // Edge case: Player already in a team (or this team)
+        if (teamManager.getPlayerTeam(targetInvite) != null) {
+            if (teamManager.getPlayerTeam(targetInvite).equals(teamToInvite)) {
+                player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + targetInvite.getName() + " is already in your team.");
+            } else {
+                player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + targetInvite.getName() + " is already in another team.");
+            }
+            return true;
+        }
+
+        String teamName = teamToInvite.getName(); // Use the validated teamToInvite
 
         // 1) register the invite
-        teamManager.invitePlayer(target, teamName);
+        Player target = Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Player '" + TeamCommand.ACCENT_COLOR + args[0] + TeamCommand.ERROR_COLOR + "' is not online.");
+            return true;
+        }
+        teamManager.invitePlayer(targetInvite, teamName); // Use targetInvite consistently
 
         Component header = Component.text(TeamCommand.MSG_PREFIX)
                 .color(NamedTextColor.GOLD)
@@ -80,10 +101,16 @@ public class InvitePlayerHandler implements SubCommandExecutor {
 
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
-        // Suggest online player names for the first argument
+        // Suggest online player names for the first argument, excluding the sender if they are a player
         if (args.length == 1) {
+            String currentPlayerName = "";
+            if (sender instanceof Player) {
+                currentPlayerName = ((Player) sender).getName();
+            }
+            final String finalCurrentPlayerName = currentPlayerName; // effectively final for lambda
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
+                    .filter(name -> !name.equalsIgnoreCase(finalCurrentPlayerName)) // Exclude current player
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();

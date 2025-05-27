@@ -18,6 +18,14 @@ public class JoinTeamHandler implements SubCommandExecutor {
             return true;
         }
         String teamName = args[0];
+
+        // Edge case: Player is already in a team
+        if (teamManager.getPlayerTeam(player) != null) {
+            player.sendMessage(TeamCommand.MSG_PREFIX
+                    + TeamCommand.ERROR_COLOR + "You are already in a team. Leave your current team first.");
+            return true;
+        }
+
         // 1) check invite
         if (!teamManager.hasInvite(player.getUniqueId(), teamName)) {
             player.sendMessage(TeamCommand.MSG_PREFIX
@@ -25,6 +33,16 @@ public class JoinTeamHandler implements SubCommandExecutor {
                     + TeamCommand.ACCENT_COLOR + teamName + TeamCommand.ERROR_COLOR + "'.");
             return true;
         }
+
+        // Edge case: Target team does not exist (should ideally not happen if invite exists, but good for robustness)
+        if (teamManager.getTeam(teamName) == null) {
+            player.sendMessage(TeamCommand.MSG_PREFIX
+                    + TeamCommand.ERROR_COLOR + "Team '" + TeamCommand.ACCENT_COLOR + teamName + TeamCommand.ERROR_COLOR + "' does not exist.");
+            // It's good practice to also remove the potentially stale invite if the team is gone
+            teamManager.removeInvite(player.getUniqueId(), teamName);
+            return true;
+        }
+
         // 2) add to team
         boolean ok = teamManager.addPlayerToTeam(teamName, player, player);
         if (ok) {
