@@ -1,15 +1,16 @@
 package com.listjonas.teamSmith.manager;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.listjonas.teamSmith.TeamSmith;
 import com.listjonas.teamSmith.data.DataManager;
 import com.listjonas.teamSmith.model.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.listjonas.teamSmith.commands.TeamCommand.*;
 
@@ -21,6 +22,7 @@ public class TeamManager {
     private static final String TEAMS_DATA_FILE = "teams.yml";
     private static final String TEAMS_CONFIG_PATH = "teams";
     private static TeamManager instance;
+    private final Multimap<UUID,String> pendingInvites = ArrayListMultimap.create();
 
     private TeamManager(TeamSmith plugin) {
         this.plugin = plugin;
@@ -345,7 +347,26 @@ public class TeamManager {
         plugin.getLogger().info("Loaded " + teams.size() + " teams from " + TEAMS_DATA_FILE);
     }
 
+    public void invitePlayer(Player invited, String teamName) {
+        pendingInvites.put(invited.getUniqueId(), teamName);
+    }
 
+    public boolean hasInvite(UUID playerId, String teamName) {
+        return pendingInvites.containsEntry(playerId, teamName);
+    }
+
+    public void removeInvite(UUID playerId, String teamName) {
+        pendingInvites.remove(playerId, teamName);
+    }
+
+    public ArrayList<String> getPendingInvites(@NotNull UUID uniqueId) {
+        if (uniqueId == null) {
+            throw new IllegalArgumentException("UUID cannot be null");
+        }
+        return pendingInvites.get(uniqueId).stream()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
 
     public void saveTeams() {
         Map<String, Map<String, Object>> teamsToSave = new HashMap<>();

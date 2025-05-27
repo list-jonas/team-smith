@@ -1,5 +1,7 @@
 package com.listjonas.teamSmith.model;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 
@@ -15,6 +17,8 @@ public class Team {
     private String prefixColor; // Added for prefix color
     private boolean friendlyFireEnabled; // Added for friendly fire setting
     private String teamMotd; // Added for team MOTD
+    private final Multimap<UUID,String> pendingInvites = ArrayListMultimap.create();
+
 
     public enum Role {
         OWNER,
@@ -264,5 +268,17 @@ public class Team {
 
     public Location getWarp(String name) {
         return warps.get(name);
+    }
+
+    public void invitePlayer(Player invited, String teamName) {
+        pendingInvites.put(invited.getUniqueId(), teamName);
+    }
+
+    public boolean hasInvite(UUID playerId, String teamName) {
+        return pendingInvites.containsEntry(playerId, teamName);
+    }
+
+    public void removeInvite(UUID playerId, String teamName) {
+        pendingInvites.remove(playerId, teamName);
     }
 }
