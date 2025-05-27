@@ -15,7 +15,7 @@ public class SetPrefixHandler implements SubCommandExecutor {
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length < 1) {
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Usage: /team prefix " + getArgumentUsage());
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Usage: /team setprefix " + getArgumentUsage());
             return true;
         }
         Team teamForPrefix = teamManager.getPlayerTeam(player);

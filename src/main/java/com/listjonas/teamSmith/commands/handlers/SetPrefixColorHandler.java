@@ -14,8 +14,8 @@ public class SetPrefixColorHandler implements SubCommandExecutor {
     @Override
     public boolean execute(Player player, String[] args, TeamManager teamManager) {
         if (args.length < 1) {
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Usage: /team prefixcolor " + getArgumentUsage());
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Example: /team prefixcolor &c (for red)");
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Usage: /team setprefixcolor " + getArgumentUsage());
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.INFO_COLOR + "Example: /team setprefixcolor &c (for red)");
             return true;
         }
         Team teamForPrefixColor = teamManager.getPlayerTeam(player);

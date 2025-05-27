@@ -36,8 +36,8 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("leave",new LeaveTeamHandler());
         handlers.put("transfer",new TransferOwnershipHandler());
         handlers.put("rename", new RenameTeamHandler());
-        handlers.put("prefix",new SetPrefixHandler());
-        handlers.put("prefixcolor",new SetPrefixColorHandler());
+        handlers.put("setprefix",new SetPrefixHandler());
+        handlers.put("setprefixcolor",new SetPrefixColorHandler());
         handlers.put("info",new TeamInfoHandler());
         handlers.put("setrole",new SetRoleHandler());
         handlers.put("motd",new SetMotdHandler());
