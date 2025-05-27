@@ -33,6 +33,12 @@ public class TeamInfoHandler implements SubCommandExecutor {
         String prefixColor = team.getPrefixColor();
         String displayPrefix = ChatColor.translateAlternateColorCodes('&', prefixColor + prefixText) + ChatColor.RESET;
         player.sendMessage(TeamCommand.INFO_COLOR + "Prefix: " + displayPrefix + (prefixText.equals("Not set") ? "" : TeamCommand.INFO_COLOR + " (Raw: " + TeamCommand.ACCENT_COLOR + prefixColor + prefixText + TeamCommand.INFO_COLOR + ")"));
+        
+        String ideology = team.getIdeology();
+        if (ideology != null && !ideology.isEmpty()) {
+            player.sendMessage(TeamCommand.INFO_COLOR + "Ideology: " + TeamCommand.ACCENT_COLOR + ideology);
+        }
+
         player.sendMessage(TeamCommand.INFO_COLOR + "Members (" + TeamCommand.ACCENT_COLOR + team.getSize() + TeamCommand.INFO_COLOR + "):");
 
         Map<UUID, Team.Role> memberRoles = team.getMemberRoles();

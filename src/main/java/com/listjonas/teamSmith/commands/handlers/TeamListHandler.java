@@ -24,9 +24,11 @@ public class TeamListHandler implements SubCommandExecutor {
                 UUID ownerId = team.getOwner();
                 Player owner = Bukkit.getPlayer(ownerId);
                 String ownerName = owner != null ? owner.getName() : "Offline Player";
+                String ideology = team.getIdeology();
+                String ideologyDisplay = (ideology != null && !ideology.isEmpty()) ? TeamCommand.INFO_COLOR + ", Ideology: " + TeamCommand.ACCENT_COLOR + ideology : "";
                 player.sendMessage(TeamCommand.ACCENT_COLOR + team.getName() + 
                     TeamCommand.INFO_COLOR + " - Owner: " + ownerName +
-                    ", Members: " + team.getSize());
+                    ", Members: " + team.getSize() + ideologyDisplay);
             });
         }
         player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ACCENT_COLOR + "----------------");

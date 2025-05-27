@@ -430,4 +430,12 @@ public class TeamManager {
     public Collection<Team> getAllTeams() {
         return teams.values();
     }
+
+    public boolean hasPermission(@NotNull UUID uniqueId, Team team, Team.Role role) {
+        if (uniqueId == null || team == null || role == null) {
+            throw new IllegalArgumentException("UUID, Team, and Role cannot be null");
+        }
+        Team.Role playerRole = team.getPlayerRole(uniqueId);
+        return playerRole != null && (playerRole == Team.Role.OWNER || playerRole == role);
+    }
 }

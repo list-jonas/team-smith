@@ -48,6 +48,7 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("setwarp", new SetWarpHandler());
         handlers.put("delwarp", new DeleteWarpHandler());
         handlers.put("warp", new TpWarpHandler());
+        handlers.put("setideology", new SetIdeologyHandler());
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){

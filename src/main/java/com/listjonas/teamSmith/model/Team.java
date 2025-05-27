@@ -17,6 +17,7 @@ public class Team {
     private String prefixColor; // Added for prefix color
     private boolean friendlyFireEnabled; // Added for friendly fire setting
     private String teamMotd; // Added for team MOTD
+    private String ideology; // Added for team ideology
     private final Multimap<UUID,String> pendingInvites = ArrayListMultimap.create();
 
 
@@ -38,6 +39,7 @@ public class Team {
         this.prefixColor = "&f"; // Default to white color
         this.friendlyFireEnabled = true; // Default to true (friendly fire enabled)
         this.teamMotd = ""; // Default to empty MOTD
+        this.ideology = ""; // Default to empty ideology
         this.homeLocation = null;
         this.warps = new HashMap<>();
     }
@@ -50,6 +52,7 @@ public class Team {
         this.prefixColor = (String) data.getOrDefault("prefixColor", "&f"); // Default to white if not found
         this.friendlyFireEnabled = (boolean) data.getOrDefault("friendlyFireEnabled", true); // Default to true if not found
         this.teamMotd = (String) data.getOrDefault("teamMotd", ""); // Default to empty if not found
+        this.ideology = (String) data.getOrDefault("ideology", ""); // Default to empty if not found
 
         this.memberRoles = new HashMap<>();
         Object rolesObj = data.get("memberRoles");
@@ -116,6 +119,7 @@ public class Team {
         data.put("prefixColor", prefixColor);
         data.put("friendlyFireEnabled", friendlyFireEnabled);
         data.put("teamMotd", teamMotd);
+        data.put("ideology", ideology);
         Map<String, String> serializedRoles = new HashMap<>();
         for (Map.Entry<UUID, Role> entry : memberRoles.entrySet()) {
             serializedRoles.put(entry.getKey().toString(), entry.getValue().name());
@@ -253,6 +257,14 @@ public class Team {
 
     public void setTeamMotd(String teamMotd) {
         this.teamMotd = teamMotd;
+    }
+
+    public String getIdeology() {
+        return ideology;
+    }
+
+    public void setIdeology(String ideology) {
+        this.ideology = ideology;
     }
 
     public Location getHomeLocation() {
