@@ -12,6 +12,7 @@ public class ConfigData {
     private int maxWarps;
     private int ramUpdateFrequencyTicks;
     private int warpTimeoutSeconds;
+    private int homeTimeoutSeconds;
 
     public ConfigData(TeamSmith plugin) {
         this.plugin = plugin;
@@ -28,7 +29,8 @@ public class ConfigData {
 
         this.maxWarps = config.getInt("max_warps", 3);
         this.ramUpdateFrequencyTicks = config.getInt("ram_update_frequency_seconds", 10) * 20; // Convert seconds to ticks
-        this.warpTimeoutSeconds = config.getInt("warp_timeout_seconds", 30);
+        this.warpTimeoutSeconds = config.getInt("warp_timeout_seconds", 180);
+        this.homeTimeoutSeconds = config.getInt("home_timeout_seconds", 120);
     }
 
     public int getMaxWarps() {
@@ -41,5 +43,9 @@ public class ConfigData {
 
     public int getWarpTimeoutSeconds() {
         return warpTimeoutSeconds;
+    }
+
+    public int getHomeTimeoutSeconds() {
+        return homeTimeoutSeconds;
     }
 }

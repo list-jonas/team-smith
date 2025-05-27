@@ -53,7 +53,7 @@ public class TeamManager {
         Team team = getPlayerTeam(player);
         if (team != null && team.getPrefix() != null && team.getPrefixColor() != null) {
             String prefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
-            String newListName = prefix + player.getName();
+            String newListName = prefix + " " + ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + player.getName());
             player.setPlayerListName(newListName);
         } else {
             player.setPlayerListName(player.getName()); // Reset if not in a team or prefix/color is null
@@ -95,6 +95,14 @@ public class TeamManager {
             leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name " + ACCENT_COLOR + teamName + ERROR_COLOR + " already exists.");
             return false;
         }
+        if (teamName.length() > 10) {
+            leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team name cannot be longer than 10 characters.");
+            return true;
+        }
+        if (!teamName.matches("^[a-zA-Z0-9&_-]+$")) {
+            leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team name contains invalid characters. Only alphanumeric and basic symbols are allowed.");
+            return true;
+        }
         if (getPlayerTeam(leader) != null) {
             leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "You are already in a team.");
             return false;
@@ -102,7 +110,7 @@ public class TeamManager {
         Team newTeam = new Team(teamName, leader);
         teams.put(teamName.toLowerCase(), newTeam);
         playerTeamMap.put(leader.getUniqueId(), teamName.toLowerCase());
-        saveTeams(); // Save after creating
+        saveTeams();
         leader.sendMessage(MSG_PREFIX + SUCCESS_COLOR + "Team " + ACCENT_COLOR + teamName + SUCCESS_COLOR + " created successfully!");
         updatePlayerTabName(leader);
         return true;

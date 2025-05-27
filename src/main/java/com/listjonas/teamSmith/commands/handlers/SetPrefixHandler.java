@@ -25,6 +25,21 @@ public class SetPrefixHandler extends SubCommandExecutor {
             return true;
         }
         String prefix = String.join(" ", args);
+
+        // Validate prefix: no spaces, max 10 chars, only alphanumeric and basic symbols
+        if (prefix.contains(" ")) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Prefix cannot contain spaces.");
+            return true;
+        }
+        if (prefix.length() > 10) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Prefix cannot be longer than 10 characters.");
+            return true;
+        }
+        if (!prefix.matches("^[a-zA-Z0-9&_-]+$")) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Prefix contains invalid characters. Only alphanumeric and basic symbols are allowed.");
+            return true;
+        }
+
         teamManager.setTeamPrefix(teamForPrefix.getName(), prefix, player);
         return true;
     }

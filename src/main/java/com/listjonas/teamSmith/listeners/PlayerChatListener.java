@@ -22,7 +22,7 @@ public class PlayerChatListener implements Listener {
         Team team = teamManager.getPlayerTeam(player);
 
         if (team != null) {
-            String prefixText = team.getPrefix();
+            String prefixText = team.getPrefix() + " ";
             String prefixColor = team.getPrefixColor();
             if (prefixText != null && !prefixText.isEmpty()) {
                 String coloredPrefix = ChatColor.translateAlternateColorCodes('&', prefixColor + prefixText);
