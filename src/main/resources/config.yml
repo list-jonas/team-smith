@@ -1,0 +1,10 @@
+# TeamSmith Plugin Configuration
+
+# Maximum number of warps a team can set
+max_warps: 3
+
+# Frequency (in seconds) for updating RAM usage in tab menu
+ram_update_frequency_seconds: 10
+
+# Cooldown (in seconds) before a player can use a team warp again
+warp_timeout_seconds: 30

@@ -1,5 +1,6 @@
 package com.listjonas.teamSmith.commands.handlers;
 
+import com.listjonas.teamSmith.TeamSmith;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
@@ -33,9 +34,10 @@ public class SetWarpHandler extends SubCommandExecutor {
             return true;
         }
         Location loc = player.getLocation();
-        boolean success = team.setWarp(warpName, loc);
+        int maxWarps = TeamSmith.getInstance().getConfigData().getMaxWarps();
+        boolean success = team.setWarp(warpName, loc, maxWarps);
         if (!success) {
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You can only have up to 3 warps.");
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You can only have up to " + maxWarps + " warps.");
             return true;
         }
         teamManager.saveTeams();

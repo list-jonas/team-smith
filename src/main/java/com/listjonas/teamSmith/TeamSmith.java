@@ -5,17 +5,19 @@ import com.listjonas.teamSmith.listeners.EntityDamageListener;
 import com.listjonas.teamSmith.listeners.PlayerChatListener;
 import com.listjonas.teamSmith.listeners.PlayerJoinListener;
 import com.listjonas.teamSmith.listeners.PlayerQuitListener;
+import com.listjonas.teamSmith.data.ConfigData;
 import com.listjonas.teamSmith.manager.TeamManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class TeamSmith extends JavaPlugin {
-
-    private static TeamSmith instance;
     private TeamManager teamManager;
+    private ConfigData configData;
+    private static TeamSmith instance;
 
     @Override
     public void onEnable() {
         instance = this;
+        configData = new ConfigData(this);
         teamManager = TeamManager.createInstance(this);
 
         // Register commands programmatically for Paper compatibility
@@ -58,7 +60,7 @@ public class TeamSmith extends JavaPlugin {
             if (teamManager != null) {
                 teamManager.updateTabListFooterForAllPlayers();
             }
-        }, 0L, 200L); // 0L delay, 200L ticks (10 seconds)
+        }, 0L, configData.getRamUpdateFrequencyTicks());
 
         getLogger().info("TeamSmith plugin has been enabled!");
     }
@@ -77,5 +79,9 @@ public class TeamSmith extends JavaPlugin {
 
     public TeamManager getTeamManager() {
         return teamManager;
+    }
+
+    public ConfigData getConfigData() {
+        return configData;
     }
 }

@@ -64,7 +64,8 @@ public class TeamManager {
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             updatePlayerTabName(onlinePlayer);
         }
-        updateTabListFooterForAllPlayers(); // Update footer after all names are set
+        updateTabListFooterForAllPlayers();
+        updateTabListHeaderForAllPlayers();
     }
 
     public void updateTabListFooterForAllPlayers() {
@@ -75,10 +76,17 @@ public class TeamManager {
         long usedMemory = allocatedMemory - freeMemory;
 
         String footerText = String.format("%sRAM: %dMB / %dMB",
-                                      ChatColor.GRAY, usedMemory, maxMemory);
+                                      ChatColor.GRAY, usedMemory, maxMemory) + "\n" + "------------------------------------------";;
 
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             onlinePlayer.setPlayerListFooter(footerText);
+        }
+    }
+
+    public void updateTabListHeaderForAllPlayers() {
+        String headerText = ChatColor.GRAY + "------------------------------------------";
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            onlinePlayer.setPlayerListHeader(headerText);
         }
     }
 

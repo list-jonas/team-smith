@@ -293,9 +293,11 @@ public class Team {
         return Collections.unmodifiableMap(warps);
     }
 
-    public boolean setWarp(String name, Location location) {
-        if (warps.size() >= 3 && !warps.containsKey(name)) return false;
-        warps.put(name, location);
+    public boolean setWarp(String name, Location loc, int maxWarps) {
+        if (warps.size() >= maxWarps) {
+            return false; // Max warps allowed
+        }
+        warps.put(name, loc);
         return true;
     }
 
