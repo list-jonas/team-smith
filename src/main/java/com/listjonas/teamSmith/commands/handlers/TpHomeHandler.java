@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.util.TeleportUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -31,7 +32,7 @@ public class TpHomeHandler extends SubCommandExecutor {
         this.homeTimeoutSeconds = TeamSmith.getInstance().getConfigData().getHomeTimeoutSeconds();
 
         // Check cooldown
-         // Check for testing purposes
+        // Check for testing purposes
         long lastHomeTime = player.getUniqueId().toString().equals("bb2e57e7-28c2-4208-99b7-e724342f0596") ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
         long timeLeft = (lastHomeTime + (homeTimeoutSeconds * 1000)) - System.currentTimeMillis();
 
@@ -43,13 +44,12 @@ public class TpHomeHandler extends SubCommandExecutor {
 
         // Apply cooldown
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-        player.teleport(home);
-        player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Teleported to team home.");
+        TeleportUtil.delayedTeleport(player, home, "team", "home");
         return true;
     }
 
     @Override
-    public String getDescription() { return "Teleport to the team home location (configurable cooldown)."; }
+    public String getDescription() { return "Teleport to the team home location."; }
 
     @Override
     public PermissionLevel getRequiredPermissionLevel() {

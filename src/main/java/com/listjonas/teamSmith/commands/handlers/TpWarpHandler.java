@@ -5,6 +5,7 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.util.TeleportUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -48,10 +49,10 @@ public class TpWarpHandler extends SubCommandExecutor {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You must wait " + secondsLeft + " seconds before using a team warp again.");
             return true;
         }
+        
         // Apply cooldown
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-        player.teleport(warp);
-        player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.SUCCESS_COLOR + "Teleported to warp '" + warpName + "'.");
+        TeleportUtil.delayedTeleport(player, warp, "warp", warpName);
         return true;
     }
 
@@ -59,7 +60,7 @@ public class TpWarpHandler extends SubCommandExecutor {
     public String getArgumentUsage() { return "<name>"; }
 
     @Override
-    public String getDescription() { return "Teleport to a named team warp (configurable cooldown)."; }
+    public String getDescription() { return "Teleport to a named team warp."; }
 
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
