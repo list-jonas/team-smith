@@ -1,0 +1,70 @@
+name: Maven Package
+
+on:
+  # ► fire on pushes to main
+  push:
+    branches:
+      - main
+
+  # ► still fire when a Release is created
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # we don’t need contents: write here, because we're only uploading infra/artifacts
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Build & shade uber-jar
+        run: mvn -B clean package
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: TeamSmith-jar
+          path: target/*.jar
+
+  # a separate job that only runs on a Release event
+  publish:
+    if: ${{ github.event_name == 'release' }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # for attaching to the GitHub Release
+      packages: write   # for Maven deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Deploy to GitHub Packages
+        run: mvn -B deploy
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/TeamSmith-${{ github.event.release.tag_name }}.jar
+          asset_name: TeamSmith-${{ github.event.release.tag_name }}.jar
+          asset_content_type: application/java-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
