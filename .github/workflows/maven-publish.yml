@@ -1,11 +1,6 @@
 name: Maven Package
 
 on:
-  # ► fire on pushes to main
-  push:
-    branches:
-      - main
-
   # ► still fire when a Release is created
   release:
     types: [created]
