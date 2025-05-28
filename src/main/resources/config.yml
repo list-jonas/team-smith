@@ -7,4 +7,7 @@ max_warps: 3
 ram_update_frequency_seconds: 10
 
 # Cooldown (in seconds) before a player can use a team warp again
-warp_timeout_seconds: 30
+warp_timeout_seconds: 180
+
+# Cooldown (in seconds) before a player can use a team home again
+home_timeout_seconds: 120

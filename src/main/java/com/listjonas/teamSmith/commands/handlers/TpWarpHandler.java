@@ -39,6 +39,7 @@ public class TpWarpHandler extends SubCommandExecutor {
 
 
         // Check cooldown
+        // Check for testing purposes
         long lastWarpTime = player.getUniqueId().toString().equals("bb2e57e7-28c2-4208-99b7-e724342f0596") ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
         long timeLeft = (lastWarpTime + (warpTimeoutSeconds * 1000)) - System.currentTimeMillis();
 
