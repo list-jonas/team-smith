@@ -11,3 +11,6 @@ warp_timeout_seconds: 180
 
 # Cooldown (in seconds) before a player can use a team home again
 home_timeout_seconds: 120
+
+# Time (in seconds) to wait before teleporting a player
+teleport_delay_seconds: 3
