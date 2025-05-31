@@ -1,6 +1,7 @@
 package com.listjonas.teamSmith.commands;
 
 import com.listjonas.teamSmith.TeamSmith;
+import com.listjonas.teamSmith.commands.handlers.CancelTpHandler;
 import com.listjonas.teamSmith.commands.handlers.*;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.Team;
@@ -50,6 +51,8 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("delwarp", new DeleteWarpHandler());
         handlers.put("warp", new TpWarpHandler());
         handlers.put("setideology", new SetIdeologyHandler());
+        handlers.put("cancel", new CancelTpHandler());
+        handlers.put("c",handlers.get("cancel"));
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
