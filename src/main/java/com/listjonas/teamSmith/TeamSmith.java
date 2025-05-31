@@ -37,7 +37,7 @@ public class TeamSmith extends JavaPlugin {
             // Set command properties
             command.setExecutor(teamExecutor);
             command.setTabCompleter(teamExecutor);
-            command.setAliases(java.util.Arrays.asList("ts", "myteam"));
+            command.setAliases(java.util.Arrays.asList("ts", "myteam", "t", "h", "team"));
             command.setDescription("Main command for TeamSmith plugin.");
             command.setUsage("/team <subcommand> [args]");
             
