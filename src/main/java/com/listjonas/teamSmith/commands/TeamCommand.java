@@ -30,29 +30,22 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         this.plugin=plugin;this.teamManager=teamManager;handlers=new HashMap<>();
         handlers.put("list", new TeamListHandler());
         handlers.put("create",new CreateTeamHandler());
-        handlers.put("delete",new DeleteTeamHandler());
-        handlers.put("disband",handlers.get("delete"));
         handlers.put("invite",new InvitePlayerHandler());
         handlers.put("join", new JoinTeamHandler());
         handlers.put("kick",new KickPlayerHandler());
         handlers.put("leave",new LeaveTeamHandler());
-        handlers.put("transfer",new TransferOwnershipHandler());
-        handlers.put("rename", new RenameTeamHandler());
-        handlers.put("setprefix",new SetPrefixHandler());
-        handlers.put("setprefixcolor",new SetPrefixColorHandler());
         handlers.put("info",new TeamInfoHandler());
-        handlers.put("setrole",new SetRoleHandler());
-        handlers.put("setmotd",new SetMotdHandler());
-        handlers.put("friendlyfire",new FriendlyFireHandler());
-        handlers.put("sethome", new SetHomeHandler());
-        handlers.put("delhome", new DeleteHomeHandler());
         handlers.put("home", new TpHomeHandler());
-        handlers.put("setwarp", new SetWarpHandler());
-        handlers.put("delwarp", new DeleteWarpHandler());
         handlers.put("warp", new TpWarpHandler());
-        handlers.put("setideology", new SetIdeologyHandler());
         handlers.put("cancel", new CancelTpHandler());
         handlers.put("c",handlers.get("cancel"));
+        handlers.put("setwarp", new SetWarpHandler());
+        handlers.put("delwarp", new DeleteWarpHandler());
+        handlers.put("sethome", new SetHomeHandler());
+        handlers.put("delhome", new DeleteHomeHandler());
+        // Add the settings handler that contains all team configuration commands
+        handlers.put("setting", new SettingHandler(teamManager));
+        handlers.put("settings", handlers.get("setting"));
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
