@@ -8,7 +8,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,24 +110,5 @@ public class DataManager {
     public void deleteDataEntry(String path, String key) {
         getConfig().set(path + "." + key, null);
         saveConfig();
-    }
-
-    /**
-     * Saves a list of strings to a specific path in the YAML file.
-     * @param path The base path to save the data under (e.g., "alliances.teamA").
-     * @param dataList The list of strings to save.
-     */
-    public void saveStringList(String path, List<String> dataList) {
-        getConfig().set(path, dataList);
-        saveConfig();
-    }
-
-    /**
-     * Loads a list of strings from a specific path in the YAML file.
-     * @param path The base path to load data from (e.g., "alliances.teamA").
-     * @return A list of strings, or an empty list if not found.
-     */
-    public List<String> loadStringList(String path) {
-        return getConfig().getStringList(path);
     }
 }

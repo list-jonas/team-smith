@@ -1,7 +1,6 @@
 package com.listjonas.teamSmith.commands.handlers;
 
 import com.listjonas.teamSmith.TeamSmith;
-import com.listjonas.teamSmith.manager.AllianceManager;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
@@ -26,35 +25,12 @@ public class TpWarpHandler extends SubCommandExecutor {
             return true;
         }
         String warpName = args[0];
-        
-        Team playerTeam = teamManager.getPlayerTeam(player);
-        if (playerTeam == null) {
+        Team team = teamManager.getPlayerTeam(player);
+        if (team == null) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You are not in a team.");
             return true;
         }
-        
-        Location warp = null;
-        Team targetTeam = null;
-
-        // First, check player's own team warps
-        warp = playerTeam.getWarp(warpName);
-        if (warp != null) {
-            targetTeam = playerTeam;
-        } else {
-            // If not found in own team, check allied teams
-            Set<String> teamsAlliedWithPlayerTeam = AllianceManager.getInstance().getTeamsAlliedWith(playerTeam.getName());
-            for (String alliedTeamName : teamsAlliedWithPlayerTeam) {
-                Team alliedTeam = teamManager.getTeam(alliedTeamName);
-                if (alliedTeam != null) {
-                    warp = alliedTeam.getWarp(warpName);
-                    if (warp != null) {
-                        targetTeam = alliedTeam;
-                        break;
-                    }
-                }
-            }
-        }
-
+        Location warp = team.getWarp(warpName);
         if (warp == null) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Warp '" + warpName + "' not found.");
             return true;
@@ -84,34 +60,20 @@ public class TpWarpHandler extends SubCommandExecutor {
     public String getArgumentUsage() { return "<name>"; }
 
     @Override
-    public String getDescription() { return "Teleport to a named team warp (from your team or allied teams)."; }
+    public String getDescription() { return "Teleport to a named team warp."; }
 
     @Override
     public List<String> getTabCompletions(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            return java.util.Collections.emptyList();
-        }
-        
-        Player player = (Player) sender;
-        Team playerTeam = TeamManager.getInstance().getPlayerTeam(player);
-        if (playerTeam == null) {
-            return java.util.Collections.emptyList();
-        }
-        
         if (args.length == 1) {
-            List<String> availableWarps = new ArrayList<>();
-            // Add warps from player's own team
-            availableWarps.addAll(playerTeam.getWarps().keySet());
-
-            // Add warps from allied teams
-            Set<String> teamsAlliedWithPlayerTeam = AllianceManager.getInstance().getTeamsAlliedWith(playerTeam.getName());
-            for (String alliedTeamName : teamsAlliedWithPlayerTeam) {
-                Team alliedTeam = TeamManager.getInstance().getTeam(alliedTeamName);
-                if (alliedTeam != null) {
-                    availableWarps.addAll(alliedTeam.getWarps().keySet());
+            // Suggest available warp names for the player's team
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                Team team = TeamManager.getInstance().getPlayerTeam(player);
+                if (team != null) {
+                    return new java.util.ArrayList<>(team.getWarps().keySet());
                 }
             }
-            return availableWarps;
+            return java.util.Collections.emptyList();
         }
         return java.util.Collections.emptyList();
     }
