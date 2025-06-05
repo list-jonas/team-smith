@@ -45,7 +45,7 @@ public class Team {
         this.name = name;
         this.memberRoles = new HashMap<>();
         this.memberRoles.put(leaderPlayer.getUniqueId(), Role.OWNER);
-        this.prefix = "[" + name + "] "; // Default prefix
+        this.prefix = name; // Default prefix
         this.prefixColor = "&f"; // Default to white color
         this.friendlyFireEnabled = true; // Default to true (friendly fire enabled)
         this.teamMotd = ""; // Default to empty MOTD

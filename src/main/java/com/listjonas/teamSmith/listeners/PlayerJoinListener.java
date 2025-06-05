@@ -20,7 +20,7 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        teamManager.updatePlayerTabName(player);
+        teamManager.getTablistManager().updatePlayerTabName(player);
 
         Team playerTeam = teamManager.getPlayerTeam(player);
         if (playerTeam != null) {
@@ -33,6 +33,6 @@ public class PlayerJoinListener implements Listener {
             }
         }
         // Update the tab list names and footer for all players after handling join specifics
-        teamManager.updateAllPlayersTabNamesAndFooter();
+        teamManager.getTablistManager().updateAllPlayersTabInfo();
     }
 }

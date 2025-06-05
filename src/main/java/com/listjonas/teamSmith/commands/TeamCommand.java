@@ -43,9 +43,17 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("delwarp", new DeleteWarpHandler());
         handlers.put("sethome", new SetHomeHandler());
         handlers.put("delhome", new DeleteHomeHandler());
-        // Add the settings handler that contains all team configuration commands
-        handlers.put("setting", new SettingHandler(teamManager));
-        handlers.put("settings", handlers.get("setting"));
+        handlers.put("transfer", new TransferOwnershipHandler());
+        handlers.put("rename", new RenameTeamHandler());
+        handlers.put("setprefix", new SetPrefixHandler());
+        handlers.put("setprefixcolor", new SetPrefixColorHandler());
+        handlers.put("setrole", new SetRoleHandler());
+        handlers.put("setmotd", new SetMotdHandler());
+        handlers.put("friendlyfire", new FriendlyFireHandler());
+        handlers.put("ff", handlers.get("friendlyfire"));
+        handlers.put("setideology", new SetIdeologyHandler());
+        handlers.put("delete",new DeleteTeamHandler());
+        handlers.put("disband",handlers.get("delete"));
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){

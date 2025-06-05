@@ -19,6 +19,6 @@ public class PlayerQuitListener implements Listener {
         // It's good to run this slightly delayed to ensure the player is fully gone from lists
         // However, for tab list updates, immediate might be fine or even preferred.
         // For now, let's do it immediately.
-        teamManager.updateAllPlayersTabNamesAndFooter();
+        teamManager.getTablistManager().updateAllPlayersTabInfo();
     }
 }

@@ -55,13 +55,6 @@ public class TeamSmith extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(teamManager), this);
         getServer().getPluginManager().registerEvents(new EntityDamageListener(teamManager), this);
 
-        // Schedule a repeating task to update the tab list footer
-        this.getServer().getScheduler().runTaskTimer(this, () -> {
-            if (teamManager != null) {
-                teamManager.updateTabListFooterForAllPlayers();
-            }
-        }, 0L, configData.getRamUpdateFrequencyTicks());
-
         getLogger().info("TeamSmith plugin has been enabled!");
     }
 
@@ -69,6 +62,7 @@ public class TeamSmith extends JavaPlugin {
     public void onDisable() {
         if (teamManager != null) {
             teamManager.saveTeams();
+            teamManager.onDisable(); // Call onDisable for TeamManager to handle TablistManager shutdown
         }
         getLogger().info("TeamSmith plugin has been disabled!");
     }
