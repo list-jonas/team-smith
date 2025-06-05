@@ -54,6 +54,7 @@ public class TeamCommand implements CommandExecutor,TabCompleter{
         handlers.put("setideology", new SetIdeologyHandler());
         handlers.put("delete",new DeleteTeamHandler());
         handlers.put("disband",handlers.get("delete"));
+        handlers.put("ally", new AllyHandler());
     }
 
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){

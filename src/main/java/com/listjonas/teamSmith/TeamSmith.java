@@ -7,6 +7,7 @@ import com.listjonas.teamSmith.listeners.PlayerJoinListener;
 import com.listjonas.teamSmith.listeners.PlayerQuitListener;
 import com.listjonas.teamSmith.data.ConfigData;
 import com.listjonas.teamSmith.manager.TeamManager;
+import com.listjonas.teamSmith.manager.AllianceManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class TeamSmith extends JavaPlugin {
@@ -19,6 +20,7 @@ public class TeamSmith extends JavaPlugin {
         instance = this;
         configData = new ConfigData(this);
         teamManager = TeamManager.createInstance(this);
+        AllianceManager.createInstance(this, teamManager); // Initialize AllianceManager
 
         // Register commands programmatically for Paper compatibility
         TeamCommand teamExecutor = new TeamCommand(this, teamManager);
@@ -64,6 +66,18 @@ public class TeamSmith extends JavaPlugin {
             teamManager.saveTeams();
             teamManager.onDisable(); // Call onDisable for TeamManager to handle TablistManager shutdown
         }
+        
+        // Save alliance data
+        try {
+            AllianceManager allianceManager = AllianceManager.getInstance();
+            if (allianceManager != null) {
+                allianceManager.saveAlliances();
+            }
+        } catch (IllegalStateException e) {
+            // AllianceManager was not initialized
+            getLogger().warning("AllianceManager was not properly initialized before shutdown");
+        }
+        
         getLogger().info("TeamSmith plugin has been disabled!");
     }
 
