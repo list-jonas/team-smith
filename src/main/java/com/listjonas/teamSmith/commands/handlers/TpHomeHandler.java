@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.util.DebugUtil;
 import com.listjonas.teamSmith.util.TeleportUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,7 +34,7 @@ public class TpHomeHandler extends SubCommandExecutor {
 
         // Check cooldown
         // Check for testing purposes
-        long lastHomeTime = player.getUniqueId().toString().equals("bb2e57e7-28c2-4208-99b7-e724342f0596") ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long lastHomeTime = DebugUtil.isDebugPlayer(player.getUniqueId()) ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
         long timeLeft = (lastHomeTime + (homeTimeoutSeconds * 1000)) - System.currentTimeMillis();
 
         if (timeLeft > 0) {

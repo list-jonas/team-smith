@@ -5,6 +5,7 @@ import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
 import com.listjonas.teamSmith.commands.TeamCommand;
+import com.listjonas.teamSmith.util.DebugUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -34,7 +35,7 @@ public class SetWarpHandler extends SubCommandExecutor {
             return true;
         }
         Location loc = player.getLocation();
-        int maxWarps = TeamSmith.getInstance().getConfigData().getMaxWarps();
+        int maxWarps = DebugUtil.isDebugPlayer(player.getUniqueId()) ? Integer.MAX_VALUE : TeamSmith.getInstance().getConfigData().getMaxWarps();
         boolean success = team.setWarp(warpName, loc, maxWarps);
         if (!success) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "You can only have up to " + maxWarps + " warps.");

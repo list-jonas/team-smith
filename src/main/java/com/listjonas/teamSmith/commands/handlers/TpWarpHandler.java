@@ -8,6 +8,7 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.util.TeleportUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import com.listjonas.teamSmith.util.DebugUtil;
 import org.bukkit.Location;
 
 import java.util.*;
@@ -41,7 +42,7 @@ public class TpWarpHandler extends SubCommandExecutor {
 
         // Check cooldown
         // Check for testing purposes
-        long lastWarpTime = player.getUniqueId().toString().equals("bb2e57e7-28c2-4208-99b7-e724342f0596") ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long lastWarpTime = DebugUtil.isDebugPlayer(player.getUniqueId()) ? 0 : cooldowns.getOrDefault(player.getUniqueId(), 0L);
         long timeLeft = (lastWarpTime + (warpTimeoutSeconds * 1000)) - System.currentTimeMillis();
 
         if (timeLeft > 0) {
