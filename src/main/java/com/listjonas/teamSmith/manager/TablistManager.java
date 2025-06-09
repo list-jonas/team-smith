@@ -62,7 +62,9 @@ public class TablistManager {
             }
             if (!prefix.isEmpty()) {
                 player.displayName(Component.text(player.getName(), NamedTextColor.WHITE));
-                player.playerListName(Component.text(prefix + " ", teamColor).append(Component.text(player.getName(), teamColor)));
+                String listPrefix = ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + team.getPrefix());
+                String newListName = listPrefix + " " + ChatColor.translateAlternateColorCodes('&', team.getPrefixColor() + player.getName());
+                player.setPlayerListName(newListName);
             } else {
                 player.displayName(Component.text(player.getName(), NamedTextColor.WHITE));
                 player.playerListName(Component.text(player.getName(), NamedTextColor.WHITE));
