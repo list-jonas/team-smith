@@ -68,8 +68,8 @@ public class TeamManager {
             leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "A team with the name " + ACCENT_COLOR + teamName + ERROR_COLOR + " already exists.");
             return false;
         }
-        if (teamName.length() > 10) {
-            leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team name cannot be longer than 10 characters.");
+        if (teamName.length() > 10 || teamName.length() < 3) {
+            leader.sendMessage(MSG_PREFIX + ERROR_COLOR + "Team name cannot be longer than 10 or shorter than 3 characters.");
             return true;
         }
         if (!teamName.matches("^[a-zA-Z0-9&_-]+$")) {

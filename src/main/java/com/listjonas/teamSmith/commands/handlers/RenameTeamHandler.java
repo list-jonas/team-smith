@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
+import com.listjonas.teamSmith.util.DebugUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,8 +34,8 @@ public class RenameTeamHandler extends SubCommandExecutor {
         String newTeamName = args[0];
 
         // Validate new team name (e.g., length, characters, uniqueness)
-        if (newTeamName.length() < 3 || newTeamName.length() > 16) {
-            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Team name must be between 3 and 16 characters.");
+        if ((newTeamName.length() < 3 || newTeamName.length() > 10) && !DebugUtil.isDebugPlayer(player.getUniqueId())) {
+            player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Team name must be between 3 and 10 characters.");
             return true;
         }
         // Add more validation if needed (e.g., allowed characters using regex)

@@ -4,6 +4,7 @@ import com.listjonas.teamSmith.commands.TeamCommand;
 import com.listjonas.teamSmith.manager.TeamManager;
 import com.listjonas.teamSmith.model.PermissionLevel;
 import com.listjonas.teamSmith.model.Team;
+import com.listjonas.teamSmith.util.DebugUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -31,7 +32,7 @@ public class SetPrefixHandler extends SubCommandExecutor {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Prefix cannot contain spaces.");
             return true;
         }
-        if (prefix.length() > 10) {
+        if ((prefix.length() < 3 || prefix.length() > 10) && !DebugUtil.isDebugPlayer(player.getUniqueId())) {
             player.sendMessage(TeamCommand.MSG_PREFIX + TeamCommand.ERROR_COLOR + "Prefix cannot be longer than 10 characters.");
             return true;
         }
